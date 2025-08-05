@@ -50,11 +50,10 @@ export class AppManager {
                         <div class="card">
                             <h2 class="text-xl font-semibold text-gray-900 mb-6">Nouvelle Cargaison</h2>
                             
-                            <!-- Sélection du type de transport -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Type de transport</label>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <button id="btn-maritime" class="cargo-type-btn cargo-maritime text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-maritime" class="cargo-type-btn bg-green-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
                                             <div class="text-center">
                                                 <div class="font-semibold">Maritime</div>
@@ -62,7 +61,7 @@ export class AppManager {
                                             </div>
                                         </div>
                                     </button>
-                                    <button id="btn-aerienne" class="cargo-type-btn cargo-aerienne text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-aerienne" class="cargo-type-btn bg-yellow-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
                                             <div class="text-center">
                                                 <div class="font-semibold">Aérienne</div>
@@ -70,7 +69,7 @@ export class AppManager {
                                             </div>
                                         </div>
                                     </button>
-                                    <button id="btn-routiere" class="cargo-type-btn cargo-routiere text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-routiere" class="cargo-type-btn bg-red-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
                                             <div class="text-center">
                                                 <div class="font-semibold">Routière</div>
@@ -111,7 +110,7 @@ export class AppManager {
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Degré de toxicité (1-10)</label>
                                         <input type="number" id="product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
                                     </div>
-                                    <button id="create-cargo" class="btn-primary w-full">Créer la cargaison</button>
+                                    <button id="create-cargo" class="bg-blue-600 h-10 rounded-xl text-white w-full">Créer la cargaison</button>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +168,7 @@ export class AppManager {
                                         <input type="number" id="add-product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
                                     </div>
                                 </div>
-                                <button id="add-product" class="btn-primary mt-4">Ajouter le produit</button>
+                                <button id="add-product" class="bg-blue-600 h-10 rounded-xl text-white mt-4 w-full">Ajouter le produit</button>
                             </div>
 
 
@@ -544,7 +543,7 @@ export class AppManager {
             const typeProduit = product.constructor.name.toLowerCase();
             const frais = this.currentCargaison!.calculerFrais(typeProduit, product.getPoids());
             
-            const typeIcons = {
+            const type = {
                 alimentaire: 'alimentaire',
                 chimique: 'chimique',
                 fragile: 'fragile',
@@ -562,12 +561,12 @@ export class AppManager {
                 <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center">
-                            <span class="text-3xl mr-4">${typeIcons[typeProduit as keyof typeof typeIcons] || 'colis'}</span>
+                            <span class="text-3xl mr-4">${type[typeProduit as keyof typeof type] || 'colis'}</span>
                             <div>
                                 <h4 class="font-semibold text-gray-900 text-lg">${product.getLibelle()}</h4>
                                 <p class="text-sm text-gray-600 mb-1">
                                     <span class="inline-block mr-4">${typeNames[typeProduit as keyof typeof typeNames] || typeProduit}</span>
-                                    <span class="inline-block">⚖️ ${product.getPoids()} kg</span>
+                                    <span class="inline-block">${product.getPoids()} kg</span>
                                 </p>
                                 ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' • ')}</p>` : ''}
                             </div>
