@@ -29,7 +29,14 @@ public ajouterProduit(produit: Produit): void {
     this.produits.push(produit);
 
     const typeProduit = produit.constructor.name.toLowerCase();
-    const frais = this.calculerFrais(typeProduit, produit.getPoids());
+    
+    // Convertir les types de matériel en 'materiel' pour le calcul des frais
+    let typeForCalculation = typeProduit;
+    if (typeProduit === 'fragile' || typeProduit === 'incassable') {
+        typeForCalculation = 'materiel';
+    }
+    
+    const frais = this.calculerFrais(typeForCalculation, produit.getPoids());
 
     console.log(` Produit ajouté : ${produit.getLibelle()} - ${produit.getPoids()}kg`);
     console.log(` Frais pour ce produit : ${frais} FCFA`);
@@ -48,7 +55,13 @@ public ajouterProduit(produit: Produit): void {
         let total = 0;
         for (let produit of this.getProduits()) {
             const typeProduit = produit.constructor.name.toLowerCase();
-            total += this.calculerFrais(typeProduit as any, produit.getPoids());
+            
+            let typeForCalculation = typeProduit;
+            if (typeProduit === 'fragile' || typeProduit === 'incassable') {
+                typeForCalculation = 'materiel';
+            }
+            
+            total += this.calculerFrais(typeForCalculation as any, produit.getPoids());
         }
         return total;
     }

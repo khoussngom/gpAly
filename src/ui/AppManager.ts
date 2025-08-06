@@ -146,7 +146,7 @@ export class AppManager {
                             </div>
 
 
-                            <div class="card mb-6">
+                            <div class="card mb-6 bg-white p-3 rounded xl">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ajouter un produit</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -327,6 +327,18 @@ export class AppManager {
         }
     }
 
+    private afficherErreur(dist: HTMLElement | null, hasError:Boolean):boolean
+    {
+                if (dist && !dist.parentElement?.querySelector('small')) {
+                    const small = document.createElement('small');
+                    small.textContent = 'Ce champ est obligatoire';
+                    small.style.color = 'red';
+                    small.style.fontSize = '10px';
+                    dist.parentElement?.appendChild(small);
+                }
+            return  hasError = true;
+    }
+
     private createCargaison(): void {
         try {
             const transportType = document.querySelector('.cargo-type-btn.ring-4')?.id.replace('btn-', '');
@@ -336,9 +348,26 @@ export class AppManager {
             const weight = parseFloat((document.getElementById('product-weight') as HTMLInputElement).value);
             const toxicity = parseInt((document.getElementById('product-toxicity') as HTMLInputElement).value);
 
-            if (!transportType || !distance || !productType || !label || !weight) {
-                throw new Error('Veuillez remplir tous les champs obligatoires');
+            let hasError = false;
+            const champs = [
+                { valeur: distance, id: 'distance' },
+                { valeur: productType, id: 'product-type' },
+                { valeur: label, id: 'product-label' },
+                { valeur: weight, id: 'product-weight' },
+            ];
+
+            for (const champ of champs) {
+                if (!champ.valeur) {
+                    const element = document.getElementById(champ.id);
+                    hasError = this.afficherErreur(element, hasError);
+                }
             }
+
+            if (!transportType || hasError) {
+                return;
+            }
+
+
 
             const initialProduct = this.createProduct(productType, label, weight, toxicity);
 
@@ -541,7 +570,13 @@ export class AppManager {
         productsList.innerHTML = products.map((product, index) => {
             const info = product.info();
             const typeProduit = product.constructor.name.toLowerCase();
-            const frais = this.currentCargaison!.calculerFrais(typeProduit, product.getPoids());
+            
+            let typeForCalculation = typeProduit;
+            if (typeProduit === 'fragile' || typeProduit === 'incassable') {
+                typeForCalculation = 'materiel';
+            }
+            
+            const frais = this.currentCargaison!.calculerFrais(typeForCalculation, product.getPoids());
             
             const type = {
                 alimentaire: 'alimentaire',
@@ -568,7 +603,7 @@ export class AppManager {
                                     <span class="inline-block mr-4">${typeNames[typeProduit as keyof typeof typeNames] || typeProduit}</span>
                                     <span class="inline-block">${product.getPoids()} kg</span>
                                 </p>
-                                ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' • ')}</p>` : ''}
+                                ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' . ')}</p>` : ''}
                             </div>
                         </div>
                         <div class="text-right">

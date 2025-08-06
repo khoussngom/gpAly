@@ -8,7 +8,7 @@ class Routiere extends Cargaison_1.Cargaison {
             case 'alimentaire':
                 return (poids * 100 * this.distance) + 5000;
             case 'materiel':
-                return poids * 200 * this.distance;
+                return poids * 400 * this.distance;
             default:
                 throw new Error("Type de produit non reconnu");
         }

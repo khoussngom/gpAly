@@ -19,13 +19,12 @@ class AppManager {
     }
     render() {
         this.container.innerHTML = `
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b">
+
+        <header class="bg-white shadow-sm border-b">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center py-6">
                         <div class="flex items-center">
-                            <div class="text-3xl mr-3">🚢</div>
-                            <div>
+                            <div class="text-center">
                                 <h1 class="text-2xl font-bold text-gray-900">Gestionnaire de Cargaison</h1>
                                 <p class="text-sm text-gray-500">Système de gestion de transport</p>
                             </div>
@@ -39,7 +38,7 @@ class AppManager {
                 </div>
             </header>
 
-            <!-- Main Content -->
+
             <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Panneau de création de cargaison -->
@@ -47,32 +46,28 @@ class AppManager {
                         <div class="card">
                             <h2 class="text-xl font-semibold text-gray-900 mb-6">Nouvelle Cargaison</h2>
                             
-                            <!-- Sélection du type de transport -->
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Type de transport</label>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <button id="btn-maritime" class="cargo-type-btn cargo-maritime text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-maritime" class="cargo-type-btn bg-green-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
-                                            <span class="text-2xl mr-2">🚢</span>
-                                            <div class="text-left">
+                                            <div class="text-center">
                                                 <div class="font-semibold">Maritime</div>
                                                 <div class="text-sm opacity-90">Transport par mer</div>
                                             </div>
                                         </div>
                                     </button>
-                                    <button id="btn-aerienne" class="cargo-type-btn cargo-aerienne text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-aerienne" class="cargo-type-btn bg-yellow-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
-                                            <span class="text-2xl mr-2">✈️</span>
-                                            <div class="text-left">
+                                            <div class="text-center">
                                                 <div class="font-semibold">Aérienne</div>
                                                 <div class="text-sm opacity-90">Transport aérien</div>
                                             </div>
                                         </div>
                                     </button>
-                                    <button id="btn-routiere" class="cargo-type-btn cargo-routiere text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
+                                    <button id="btn-routiere" class="cargo-type-btn bg-red-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
                                         <div class="flex items-center justify-center">
-                                            <span class="text-2xl mr-2">🚛</span>
-                                            <div class="text-left">
+                                            <div class="text-center">
                                                 <div class="font-semibold">Routière</div>
                                                 <div class="text-sm opacity-90">Transport routier</div>
                                             </div>
@@ -81,7 +76,7 @@ class AppManager {
                                 </div>
                             </div>
 
-                            <!-- Formulaire de produit initial -->
+
                             <div id="initial-product-form" class="hidden">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Produit initial</h3>
                                 <div class="space-y-4">
@@ -111,13 +106,13 @@ class AppManager {
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Degré de toxicité (1-10)</label>
                                         <input type="number" id="product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
                                     </div>
-                                    <button id="create-cargo" class="btn-primary w-full">Créer la cargaison</button>
+                                    <button id="create-cargo" class="bg-blue-600 h-10 rounded-xl text-white w-full">Créer la cargaison</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Panneau principal -->
+
                     <div class="lg:col-span-2">
                         <div id="cargo-dashboard" class="hidden">
                             <!-- Informations de la cargaison -->
@@ -146,8 +141,8 @@ class AppManager {
                                 </div>
                             </div>
 
-                            <!-- Ajouter un produit -->
-                            <div class="card mb-6">
+
+                            <div class="card mb-6 bg-white p-3 rounded xl">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ajouter un produit</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -169,10 +164,10 @@ class AppManager {
                                         <input type="number" id="add-product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
                                     </div>
                                 </div>
-                                <button id="add-product" class="btn-primary mt-4">Ajouter le produit</button>
+                                <button id="add-product" class="bg-blue-600 h-10 rounded-xl text-white mt-4 w-full">Ajouter le produit</button>
                             </div>
 
-                            <!-- Liste des produits -->
+
                             <div class="card">
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-lg font-semibold text-gray-900">Produits dans la cargaison</h3>
@@ -181,10 +176,11 @@ class AppManager {
                                     </div>
                                 </div>
                                 <div id="products-list" class="space-y-3">
-                                    <!-- Les produits seront affichés ici -->
+
+
                                 </div>
                                 
-                                <!-- Résumé et validation -->
+
                                 <div id="cargo-summary" class="hidden mt-6 pt-6 border-t border-gray-200">
                                     <div class="bg-blue-50 rounded-lg p-4 mb-4">
                                         <h4 class="font-medium text-blue-900 mb-2">Résumé de la cargaison</h4>
@@ -206,19 +202,19 @@ class AppManager {
                                     
                                     <div class="flex gap-3">
                                         <button id="validate-cargo" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-                                            ✅ Valider la cargaison
+                                            Valider la cargaison
                                         </button>
                                         <button id="reset-cargo" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-                                            🔄 Recommencer
+                                            Recommencer
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- État initial -->
+
                         <div id="empty-state" class="text-center py-12">
-                            <div class="text-6xl mb-4">📦</div>
+                            <div class="text-6xl mb-4">Colis</div>
                             <h3 class="text-xl font-medium text-gray-900 mb-2">Aucune cargaison</h3>
                             <p class="text-gray-600">Créez une nouvelle cargaison pour commencer</p>
                         </div>
@@ -228,40 +224,31 @@ class AppManager {
         `;
     }
     attachEventListeners() {
-        // Sélection du type de transport
         ['maritime', 'aerienne', 'routiere'].forEach(type => {
             const btn = document.getElementById(`btn-${type}`);
             btn === null || btn === void 0 ? void 0 : btn.addEventListener('click', () => this.selectTransportType(type));
         });
-        // Gestion du changement de type de produit
         const productTypeSelect = document.getElementById('product-type');
         productTypeSelect === null || productTypeSelect === void 0 ? void 0 : productTypeSelect.addEventListener('change', () => this.toggleToxicityField());
         const addProductTypeSelect = document.getElementById('add-product-type');
         addProductTypeSelect === null || addProductTypeSelect === void 0 ? void 0 : addProductTypeSelect.addEventListener('change', () => this.toggleAddToxicityField());
-        // Création de la cargaison
         const createCargoBtn = document.getElementById('create-cargo');
         createCargoBtn === null || createCargoBtn === void 0 ? void 0 : createCargoBtn.addEventListener('click', () => this.createCargaison());
-        // Ajout de produit
         const addProductBtn = document.getElementById('add-product');
         addProductBtn === null || addProductBtn === void 0 ? void 0 : addProductBtn.addEventListener('click', () => this.addProduct());
-        // Validation de la cargaison
         const validateCargoBtn = document.getElementById('validate-cargo');
         validateCargoBtn === null || validateCargoBtn === void 0 ? void 0 : validateCargoBtn.addEventListener('click', () => this.validateCargaison());
-        // Reset de la cargaison
         const resetCargoBtn = document.getElementById('reset-cargo');
         resetCargoBtn === null || resetCargoBtn === void 0 ? void 0 : resetCargoBtn.addEventListener('click', () => this.resetCargaison());
     }
     selectTransportType(type) {
-        // Mettre à jour l'interface
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
             btn.classList.remove('ring-4', 'ring-white', 'ring-opacity-50');
         });
         const selectedBtn = document.getElementById(`btn-${type}`);
         selectedBtn === null || selectedBtn === void 0 ? void 0 : selectedBtn.classList.add('ring-4', 'ring-white', 'ring-opacity-50');
-        // Afficher le formulaire
         const form = document.getElementById('initial-product-form');
         form === null || form === void 0 ? void 0 : form.classList.remove('hidden');
-        // Mettre à jour les options de produit selon le type de transport
         this.updateProductOptions(type);
     }
     updateProductOptions(transportType) {
@@ -313,6 +300,17 @@ class AppManager {
             toxicityField === null || toxicityField === void 0 ? void 0 : toxicityField.classList.add('hidden');
         }
     }
+    afficherErreur(dist, hasError) {
+        var _a, _b;
+        if (dist && !((_a = dist.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('small'))) {
+            const small = document.createElement('small');
+            small.textContent = 'Ce champ est obligatoire';
+            small.style.color = 'red';
+            small.style.fontSize = '10px';
+            (_b = dist.parentElement) === null || _b === void 0 ? void 0 : _b.appendChild(small);
+        }
+        return hasError = true;
+    }
     createCargaison() {
         var _a;
         try {
@@ -322,12 +320,23 @@ class AppManager {
             const label = document.getElementById('product-label').value;
             const weight = parseFloat(document.getElementById('product-weight').value);
             const toxicity = parseInt(document.getElementById('product-toxicity').value);
-            if (!transportType || !distance || !productType || !label || !weight) {
-                throw new Error('Veuillez remplir tous les champs obligatoires');
+            let hasError = false;
+            const champs = [
+                { valeur: distance, id: 'distance' },
+                { valeur: productType, id: 'product-type' },
+                { valeur: label, id: 'product-label' },
+                { valeur: weight, id: 'product-weight' },
+            ];
+            for (const champ of champs) {
+                if (!champ.valeur) {
+                    const element = document.getElementById(champ.id);
+                    hasError = this.afficherErreur(element, hasError);
+                }
             }
-            // Créer le produit initial
+            if (!transportType || hasError) {
+                return;
+            }
             const initialProduct = this.createProduct(productType, label, weight, toxicity);
-            // Créer la cargaison
             switch (transportType) {
                 case 'maritime':
                     this.currentCargaison = new Maritime_1.Maritime(initialProduct, distance);
@@ -389,25 +398,19 @@ class AppManager {
         var _a, _b;
         if (!this.currentCargaison)
             return;
-        // Afficher le dashboard
         (_a = document.getElementById('empty-state')) === null || _a === void 0 ? void 0 : _a.classList.add('hidden');
         (_b = document.getElementById('cargo-dashboard')) === null || _b === void 0 ? void 0 : _b.classList.remove('hidden');
-        // Mettre à jour les informations
         const transportType = this.currentCargaison.constructor.name.toLowerCase();
-        const icons = { maritime: '🚢', aerienne: '✈️', routiere: '🚛' };
+        const icons = { maritime: 'maritime', aerienne: 'aerienne', routiere: 'routiére' };
         const names = { maritime: 'Transport Maritime', aerienne: 'Transport Aérien', routiere: 'Transport Routier' };
         document.getElementById('cargo-icon').textContent = icons[transportType];
         document.getElementById('cargo-type-name').textContent = names[transportType];
         document.getElementById('cargo-distance').textContent = `Distance: ${this.currentCargaison.getDistance()} km`;
         document.getElementById('product-count').textContent = this.currentCargaison.nbProduit().toString();
         document.getElementById('total-cost').textContent = `${this.currentCargaison.sommeTotale().toLocaleString()} FCFA`;
-        // Mettre à jour le compteur de produits
         document.getElementById('product-counter').textContent = this.currentCargaison.nbProduit().toString();
-        // Mettre à jour le résumé
         this.updateSummary();
-        // Mettre à jour la liste des produits
         this.updateProductsList();
-        // Mettre à jour le header compteur (sans re-render complet)
         const headerCounter = document.querySelector('header .text-sm.text-gray-500');
         if (headerCounter) {
             headerCounter.textContent = `${this.currentCargaison.nbProduit()}/10 produits`;
@@ -510,8 +513,13 @@ class AppManager {
         productsList.innerHTML = products.map((product, index) => {
             const info = product.info();
             const typeProduit = product.constructor.name.toLowerCase();
-            const frais = this.currentCargaison.calculerFrais(typeProduit, product.getPoids());
-            const typeIcons = {
+            // Convertir les types de matériel en 'materiel' pour le calcul des frais
+            let typeForCalculation = typeProduit;
+            if (typeProduit === 'fragile' || typeProduit === 'incassable') {
+                typeForCalculation = 'materiel';
+            }
+            const frais = this.currentCargaison.calculerFrais(typeForCalculation, product.getPoids());
+            const type = {
                 alimentaire: 'alimentaire',
                 chimique: 'chimique',
                 fragile: 'fragile',
@@ -527,14 +535,14 @@ class AppManager {
                 <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center">
-                            <span class="text-3xl mr-4">${typeIcons[typeProduit] || '📦'}</span>
+                            <span class="text-3xl mr-4">${type[typeProduit] || 'colis'}</span>
                             <div>
                                 <h4 class="font-semibold text-gray-900 text-lg">${product.getLibelle()}</h4>
                                 <p class="text-sm text-gray-600 mb-1">
-                                    <span class="inline-block mr-4">📂 ${typeNames[typeProduit] || typeProduit}</span>
-                                    <span class="inline-block">⚖️ ${product.getPoids()} kg</span>
+                                    <span class="inline-block mr-4">${typeNames[typeProduit] || typeProduit}</span>
+                                    <span class="inline-block">${product.getPoids()} kg</span>
                                 </p>
-                                ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' • ')}</p>` : ''}
+                                ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' . ')}</p>` : ''}
                             </div>
                         </div>
                         <div class="text-right">

@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./styles.css");
 const AppManager_1 = require("./ui/AppManager");
-// Point d'entrée de l'application
 document.addEventListener('DOMContentLoaded', () => {
     const appElement = document.getElementById('app');
     if (appElement) {
