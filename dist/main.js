@@ -5,7 +5,8 @@ const AppManager_1 = require("./ui/AppManager");
 document.addEventListener('DOMContentLoaded', () => {
     const appElement = document.getElementById('app');
     if (appElement) {
-        const app = new AppManager_1.AppManager(appElement);
+        const app = new AppManager_1.AppManager();
+        window.appManager = app; // Rendre accessible globalement
         app.init();
     }
     else {

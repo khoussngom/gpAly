@@ -1,590 +1,971 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppManager = void 0;
+const GestionnaireCargaisons_1 = require("../models/GestionnaireCargaisons");
 const Maritime_1 = require("../models/Maritime");
 const Aerienne_1 = require("../models/Aerienne");
 const Routiere_1 = require("../models/Routiere");
+const CargaisonManager_1 = require("./CargaisonManager");
 const Alimentaire_1 = require("../models/Alimentaire");
 const Chimique_1 = require("../models/Chimique");
 const Fragile_1 = require("../models/Fragile");
 const Incassable_1 = require("../models/Incassable");
+const Client_1 = require("../models/Client");
+const Colis_1 = require("../models/Colis");
 class AppManager {
-    constructor(container) {
-        this.currentCargaison = null;
-        this.container = container;
+    constructor() {
+        this.currentTab = 'create';
+        this.selectedCargaisonType = null;
+        this.map = null;
+        this.coordinatesDepart = null;
+        this.coordinatesArrivee = null;
+        this.selectingFor = null;
+        this.produitsEnAttente = [];
+        this.clientsEnregistres = [];
+        this.distanceLine = null; // Pour la ligne de distance sur la carte
+        this.gestionnaire = new GestionnaireCargaisons_1.GestionnaireCargaisons();
+        // On passera le container plus tard dans la méthode init
+        this.cargaisonManager = null;
     }
     init() {
         this.render();
         this.attachEventListeners();
+        // Initialiser le CargaisonManager avec le container approprié
+        const manageContainer = document.getElementById('manage-view');
+        if (manageContainer) {
+            this.cargaisonManager = new CargaisonManager_1.CargaisonManager(manageContainer);
+            this.cargaisonManager.init();
+        }
     }
     render() {
-        this.container.innerHTML = `
-
-        <header class="bg-white shadow-sm border-b">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between items-center py-6">
-                        <div class="flex items-center">
-                            <div class="text-center">
-                                <h1 class="text-2xl font-bold text-gray-900">Gestionnaire de Cargaison</h1>
-                                <p class="text-sm text-gray-500">Système de gestion de transport</p>
+        const appContainer = document.getElementById('app');
+        if (!appContainer)
+            return;
+        const headerHTML = `
+            <div class="min-h-screen bg-gray-50">
+                <header class="bg-blue-600 text-white shadow-lg">
+                    <div class="container mx-auto px-4 py-6">
+                        <h1 class="text-3xl font-bold">Gestion des Cargaisons</h1>
+                        <p class="text-blue-100 mt-2">Système de suivi des transports</p>
+                    </div>
+                </header>`;
+        const tabsHTML = `
+                <nav class="bg-white shadow-sm border-b">
+                    <div class="container mx-auto px-4">
+                        <div class="flex space-x-8">
+                            <button id="tab-create" class="tab-button py-4 px-6 border-b-2 font-medium text-sm ${this.currentTab === 'create' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}">
+                                Créer une Cargaison
+                            </button>
+                            <button id="tab-manage" class="tab-button py-4 px-6 border-b-2 font-medium text-sm ${this.currentTab === 'manage' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}">
+                                Gérer les Cargaisons
+                            </button>
+                        </div>
+                    </div>
+                </nav>`;
+        const contentHTML = `
+                <main class="container mx-auto px-4 py-8">
+                    <div id="tab-content">
+                        ${this.currentTab === 'create' ? this.renderCreateView() : '<div id="manage-view"></div>'}
+                    </div>
+                </main>
+            </div>`;
+        appContainer.innerHTML = headerHTML + tabsHTML + contentHTML;
+    }
+    renderCreateView() {
+        const typeSelectionHTML = `
+            <div id="create-view" class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Créer une nouvelle cargaison</h2>
+                    
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-gray-700 mb-4">Type de transport</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button id="btn-maritime" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'maritime' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🚢</div>
+                                    <div class="font-semibold text-gray-800">Maritime</div>
+                                    <div class="text-sm text-gray-600">Transport par mer</div>
+                                </div>
+                            </button>
+                            <button id="btn-aerienne" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'aerienne' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">✈️</div>
+                                    <div class="font-semibold text-gray-800">Aérienne</div>
+                                    <div class="text-sm text-gray-600">Transport aérien</div>
+                                </div>
+                            </button>
+                            <button id="btn-routiere" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'routiere' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">🚛</div>
+                                    <div class="font-semibold text-gray-800">Routière</div>
+                                    <div class="text-sm text-gray-600">Transport terrestre</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>`;
+        const formHTML = `
+                    <div id="form-container" class="${!this.selectedCargaisonType ? 'hidden' : ''}">
+                        <!-- Informations de base de la cargaison -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informations de base</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="numero" class="block text-sm font-medium text-gray-700 mb-2">Numéro de cargaison</label>
+                                    <input type="text" id="numero" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="CARGO-2024-001">
+                                </div>
+                                <div>
+                                    <label for="poids-max" class="block text-sm font-medium text-gray-700 mb-2">Poids maximum (kg)</label>
+                                    <input type="number" id="poids-max" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="1000">
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4">
-                            <div class="text-sm text-gray-500">
-                                ${this.currentCargaison ? `${this.currentCargaison.nbProduit()}/10 produits` : 'Aucune cargaison'}
+
+                        <!-- Section Client -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">👤 Informations du client</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="client-prenom" class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+                                    <input type="text" id="client-prenom" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Jean" required>
+                                </div>
+                                <div>
+                                    <label for="client-nom" class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                                    <input type="text" id="client-nom" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Dupont" required>
+                                </div>
+                                <div>
+                                    <label for="client-telephone" class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
+                                    <input type="tel" id="client-telephone" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="+221 77 123 45 67" required>
+                                </div>
+                                <div>
+                                    <label for="client-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="client-email" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="jean.dupont@email.com">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="client-adresse" class="block text-sm font-medium text-gray-700 mb-2">Adresse *</label>
+                                    <textarea id="client-adresse" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="2" placeholder="Rue, Ville, Région" required></textarea>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- Section Produit -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📦 Produit initial (obligatoire)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                <div>
+                                    <label for="produit-libelle" class="block text-sm font-medium text-gray-700 mb-2">Libellé du produit *</label>
+                                    <input type="text" id="produit-libelle" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ordinateur portable" required>
+                                </div>
+                                <div>
+                                    <label for="produit-poids" class="block text-sm font-medium text-gray-700 mb-2">Poids (kg) *</label>
+                                    <input type="number" id="produit-poids" step="0.1" min="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="2.5" required>
+                                </div>
+                                <div>
+                                    <label for="produit-type" class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
+                                    <select id="produit-type" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                                        <option value="">Sélectionner un type</option>
+                                        <option value="alimentaire">🍎 Alimentaire</option>
+                                        <option value="chimique">⚗️ Chimique</option>
+                                        <option value="materiel-fragile">📱 Matériel fragile</option>
+                                        <option value="materiel-incassable">🔧 Matériel incassable</option>
+                                    </select>
+                                </div>
+                                <div id="toxicite-container" class="hidden">
+                                    <label for="produit-toxicite" class="block text-sm font-medium text-gray-700 mb-2">Niveau de toxicité *</label>
+                                    <select id="produit-toxicite" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        <option value="">Sélectionner</option>
+                                        <option value="1">Niveau 1 - Faible</option>
+                                        <option value="2">Niveau 2 - Modéré</option>
+                                        <option value="3">Niveau 3 - Élevé</option>
+                                        <option value="4">Niveau 4 - Très élevé</option>
+                                        <option value="5">Niveau 5 - Extrême</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button id="btn-add-produit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                        ➕ Ajouter ce produit
+                                    </button>
+                                    <button id="btn-add-another-produit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 hidden">
+                                        ➕ Ajouter un autre produit
+                                    </button>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    Produits ajoutés: <span id="produits-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Liste des produits ajoutés -->
+                        <div id="produits-list" class="bg-white border border-gray-200 rounded-lg mb-6 hidden">
+                            <div class="p-4 border-b border-gray-200">
+                                <h4 class="font-semibold text-gray-800">Produits dans cette cargaison</h4>
+                            </div>
+                            <div id="produits-container" class="p-4 space-y-2">
+                                <!-- Les produits seront ajoutés ici dynamiquement -->
+                            </div>
+                        </div>
+
+                        ${this.renderCoordinatesSection()}
+                        ${this.renderMapSection()}
+                        <div id="specific-fields" class="mb-6">
+                            ${this.renderSpecificFields()}
+                        </div>
+                        <div class="flex justify-end">
+                            <button id="btn-create-cargaison" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700" disabled>
+                                Créer la cargaison
+                            </button>
                         </div>
                     </div>
                 </div>
-            </header>
-
-
-            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Panneau de création de cargaison -->
-                    <div class="lg:col-span-1">
-                        <div class="card">
-                            <h2 class="text-xl font-semibold text-gray-900 mb-6">Nouvelle Cargaison</h2>
-                            
-                            <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Type de transport</label>
-                                <div class="grid grid-cols-1 gap-3">
-                                    <button id="btn-maritime" class="cargo-type-btn bg-green-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
-                                        <div class="flex items-center justify-center">
-                                            <div class="text-center">
-                                                <div class="font-semibold">Maritime</div>
-                                                <div class="text-sm opacity-90">Transport par mer</div>
-                                            </div>
-                                        </div>
-                                    </button>
-                                    <button id="btn-aerienne" class="cargo-type-btn bg-yellow-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
-                                        <div class="flex items-center justify-center">
-                                            <div class="text-center">
-                                                <div class="font-semibold">Aérienne</div>
-                                                <div class="text-sm opacity-90">Transport aérien</div>
-                                            </div>
-                                        </div>
-                                    </button>
-                                    <button id="btn-routiere" class="cargo-type-btn bg-red-600 text-white p-4 rounded-lg font-medium transition-all hover:scale-105">
-                                        <div class="flex items-center justify-center">
-                                            <div class="text-center">
-                                                <div class="font-semibold">Routière</div>
-                                                <div class="text-sm opacity-90">Transport routier</div>
-                                            </div>
-                                        </div>
-                                    </button>
-                                </div>
+            </div>`;
+        return typeSelectionHTML + formHTML;
+    }
+    renderCoordinatesSection() {
+        return `
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-800 mb-4">Coordonnées</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h4 class="font-medium text-gray-700">Point de départ</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="lat-depart" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                                <input type="number" id="lat-depart" step="any" class="w-full px-3 py-2 border border-gray-300 rounded-md" readonly>
                             </div>
-
-
-                            <div id="initial-product-form" class="hidden">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Produit initial</h3>
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Distance (km)</label>
-                                        <input type="number" id="distance" class="input-field" placeholder="ex: 1000" min="1">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Type de produit</label>
-                                        <select id="product-type" class="input-field">
-                                            <option value="">Sélectionner un type</option>
-                                            <option value="alimentaire">Alimentaire</option>
-                                            <option value="chimique">Chimique</option>
-                                            <option value="fragile">Matériel fragile</option>
-                                            <option value="incassable">Matériel incassable</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Libellé</label>
-                                        <input type="text" id="product-label" class="input-field" placeholder="Nom du produit">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Poids (kg)</label>
-                                        <input type="number" id="product-weight" class="input-field" placeholder="ex: 10.5" min="0.1" step="0.1">
-                                    </div>
-                                    <div id="toxicity-field" class="hidden">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Degré de toxicité (1-10)</label>
-                                        <input type="number" id="product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
-                                    </div>
-                                    <button id="create-cargo" class="bg-blue-600 h-10 rounded-xl text-white w-full">Créer la cargaison</button>
-                                </div>
+                            <div>
+                                <label for="lng-depart" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                                <input type="number" id="lng-depart" step="any" class="w-full px-3 py-2 border border-gray-300 rounded-md" readonly>
                             </div>
                         </div>
+                        <button id="btn-select-depart" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Sélectionner sur la carte
+                        </button>
                     </div>
-
-
-                    <div class="lg:col-span-2">
-                        <div id="cargo-dashboard" class="hidden">
-                            <!-- Informations de la cargaison -->
-                            <div class="card mb-6">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h2 class="text-xl font-semibold text-gray-900">Cargaison actuelle</h2>
-                                        <p id="cargo-info" class="text-gray-600"></p>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-2xl font-bold text-primary-600" id="total-cost">0 FCFA</div>
-                                        <div class="text-sm text-gray-500">Coût total</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                    <div class="flex items-center">
-                                        <span id="cargo-icon" class="text-3xl mr-3"></span>
-                                        <div>
-                                            <div class="font-medium" id="cargo-type-name"></div>
-                                            <div class="text-sm text-gray-600" id="cargo-distance"></div>
-                                        </div>
-                                    </div>
-                                    <div class="text-sm text-gray-600">
-                                        <span id="product-count">0</span>/10 produits
-                                    </div>
-                                </div>
+                    
+                    <div class="space-y-4">
+                        <h4 class="font-medium text-gray-700">Point d'arrivée</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="lat-arrivee" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                                <input type="number" id="lat-arrivee" step="any" class="w-full px-3 py-2 border border-gray-300 rounded-md" readonly>
                             </div>
-
-
-                            <div class="card mb-6 bg-white p-3 rounded xl">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Ajouter un produit</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Type de produit</label>
-                                        <select id="add-product-type" class="input-field">
-                                            <option value="">Sélectionner un type</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Libellé</label>
-                                        <input type="text" id="add-product-label" class="input-field" placeholder="Nom du produit">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Poids (kg)</label>
-                                        <input type="number" id="add-product-weight" class="input-field" placeholder="ex: 10.5" min="0.1" step="0.1">
-                                    </div>
-                                    <div id="add-toxicity-field" class="hidden">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Degré de toxicité (1-10)</label>
-                                        <input type="number" id="add-product-toxicity" class="input-field" placeholder="ex: 5" min="1" max="10">
-                                    </div>
-                                </div>
-                                <button id="add-product" class="bg-blue-600 h-10 rounded-xl text-white mt-4 w-full">Ajouter le produit</button>
-                            </div>
-
-
-                            <div class="card">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-semibold text-gray-900">Produits dans la cargaison</h3>
-                                    <div class="text-sm text-gray-600">
-                                        <span id="product-counter">0</span> produit(s)
-                                    </div>
-                                </div>
-                                <div id="products-list" class="space-y-3">
-
-
-                                </div>
-                                
-
-                                <div id="cargo-summary" class="hidden mt-6 pt-6 border-t border-gray-200">
-                                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                        <h4 class="font-medium text-blue-900 mb-2">Résumé de la cargaison</h4>
-                                        <div class="grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <span class="text-blue-700">Nombre de produits :</span>
-                                                <span class="font-medium" id="summary-product-count">0</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-blue-700">Distance :</span>
-                                                <span class="font-medium" id="summary-distance">0 km</span>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3 text-lg">
-                                            <span class="text-blue-700">Total des frais :</span>
-                                            <span class="font-bold text-blue-900" id="summary-total-cost">0 FCFA</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex gap-3">
-                                        <button id="validate-cargo" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-                                            Valider la cargaison
-                                        </button>
-                                        <button id="reset-cargo" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-                                            Recommencer
-                                        </button>
-                                    </div>
-                                </div>
+                            <div>
+                                <label for="lng-arrivee" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                                <input type="number" id="lng-arrivee" step="any" class="w-full px-3 py-2 border border-gray-300 rounded-md" readonly>
                             </div>
                         </div>
-
-
-                        <div id="empty-state" class="text-center py-12">
-                            <div class="text-6xl mb-4">Colis</div>
-                            <h3 class="text-xl font-medium text-gray-900 mb-2">Aucune cargaison</h3>
-                            <p class="text-gray-600">Créez une nouvelle cargaison pour commencer</p>
+                        <button id="btn-select-arrivee" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Sélectionner sur la carte
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Affichage de la distance -->
+                <div id="distance-display" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-2">Distance calculée</h4>
+                            <div class="text-3xl font-bold text-blue-600" id="distance-value">--</div>
+                            <div class="text-sm text-blue-700">kilomètres</div>
                         </div>
                     </div>
                 </div>
-            </main>
-        `;
+            </div>`;
+    }
+    renderMapSection() {
+        return `
+            <div id="map-container" class="hidden mb-6">
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-medium text-gray-700">Sélection des coordonnées</h4>
+                        <button id="btn-close-map" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                            Fermer la carte
+                        </button>
+                    </div>
+                    <div id="map" class="h-96 rounded-lg"></div>
+                    <p class="text-sm text-gray-600 mt-2">Cliquez sur la carte pour sélectionner</p>
+                </div>
+            </div>`;
+    }
+    renderSpecificFields() {
+        if (!this.selectedCargaisonType)
+            return '';
+        switch (this.selectedCargaisonType) {
+            case 'maritime':
+                return `
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Transport Maritime</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="nom-navire" class="block text-sm font-medium text-gray-700 mb-2">Nom du navire</label>
+                            <input type="text" id="nom-navire" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ocean Explorer">
+                        </div>
+                        <div>
+                            <label for="port-depart" class="block text-sm font-medium text-gray-700 mb-2">Port de départ</label>
+                            <input type="text" id="port-depart" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Port de Marseille">
+                        </div>
+                        <div>
+                            <label for="port-arrivee" class="block text-sm font-medium text-gray-700 mb-2">Port d'arrivée</label>
+                            <input type="text" id="port-arrivee" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Port de Tunis">
+                        </div>
+                    </div>`;
+            case 'aerienne':
+                return `
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Transport Aérien</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="numero-vol" class="block text-sm font-medium text-gray-700 mb-2">Numéro de vol</label>
+                            <input type="text" id="numero-vol" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="AF1234">
+                        </div>
+                        <div>
+                            <label for="aeroport-depart" class="block text-sm font-medium text-gray-700 mb-2">Aéroport de départ</label>
+                            <input type="text" id="aeroport-depart" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="CDG Paris">
+                        </div>
+                        <div>
+                            <label for="aeroport-arrivee" class="block text-sm font-medium text-gray-700 mb-2">Aéroport d'arrivée</label>
+                            <input type="text" id="aeroport-arrivee" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="TUN Tunis">
+                        </div>
+                    </div>`;
+            case 'routiere':
+                return `
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Transport Routier</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="immatriculation" class="block text-sm font-medium text-gray-700 mb-2">Immatriculation</label>
+                            <input type="text" id="immatriculation" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="123 TUN 456">
+                        </div>
+                        <div>
+                            <label for="nom-chauffeur" class="block text-sm font-medium text-gray-700 mb-2">Nom du chauffeur</label>
+                            <input type="text" id="nom-chauffeur" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ahmed Ben Ali">
+                        </div>
+                    </div>`;
+            default:
+                return '';
+        }
     }
     attachEventListeners() {
-        ['maritime', 'aerienne', 'routiere'].forEach(type => {
-            const btn = document.getElementById(`btn-${type}`);
-            btn === null || btn === void 0 ? void 0 : btn.addEventListener('click', () => this.selectTransportType(type));
-        });
-        const productTypeSelect = document.getElementById('product-type');
-        productTypeSelect === null || productTypeSelect === void 0 ? void 0 : productTypeSelect.addEventListener('change', () => this.toggleToxicityField());
-        const addProductTypeSelect = document.getElementById('add-product-type');
-        addProductTypeSelect === null || addProductTypeSelect === void 0 ? void 0 : addProductTypeSelect.addEventListener('change', () => this.toggleAddToxicityField());
-        const createCargoBtn = document.getElementById('create-cargo');
-        createCargoBtn === null || createCargoBtn === void 0 ? void 0 : createCargoBtn.addEventListener('click', () => this.createCargaison());
-        const addProductBtn = document.getElementById('add-product');
-        addProductBtn === null || addProductBtn === void 0 ? void 0 : addProductBtn.addEventListener('click', () => this.addProduct());
-        const validateCargoBtn = document.getElementById('validate-cargo');
-        validateCargoBtn === null || validateCargoBtn === void 0 ? void 0 : validateCargoBtn.addEventListener('click', () => this.validateCargaison());
-        const resetCargoBtn = document.getElementById('reset-cargo');
-        resetCargoBtn === null || resetCargoBtn === void 0 ? void 0 : resetCargoBtn.addEventListener('click', () => this.resetCargaison());
+        // Tab navigation
+        const tabCreate = document.getElementById('tab-create');
+        const tabManage = document.getElementById('tab-manage');
+        if (tabCreate) {
+            tabCreate.addEventListener('click', () => this.switchTab('create'));
+        }
+        if (tabManage) {
+            tabManage.addEventListener('click', () => this.switchTab('manage'));
+        }
+        // Cargo type selection
+        const btnMaritime = document.getElementById('btn-maritime');
+        const btnAerienne = document.getElementById('btn-aerienne');
+        const btnRoutiere = document.getElementById('btn-routiere');
+        if (btnMaritime) {
+            btnMaritime.addEventListener('click', () => this.selectCargaisonType('maritime'));
+        }
+        if (btnAerienne) {
+            btnAerienne.addEventListener('click', () => this.selectCargaisonType('aerienne'));
+        }
+        if (btnRoutiere) {
+            btnRoutiere.addEventListener('click', () => this.selectCargaisonType('routiere'));
+        }
+        // Coordinate selection
+        const btnSelectDepart = document.getElementById('btn-select-depart');
+        const btnSelectArrivee = document.getElementById('btn-select-arrivee');
+        const btnCloseMap = document.getElementById('btn-close-map');
+        if (btnSelectDepart) {
+            btnSelectDepart.addEventListener('click', () => this.openMapForSelection('depart'));
+        }
+        if (btnSelectArrivee) {
+            btnSelectArrivee.addEventListener('click', () => this.openMapForSelection('arrivee'));
+        }
+        if (btnCloseMap) {
+            btnCloseMap.addEventListener('click', () => this.closeMap());
+        }
+        // Form submission
+        const btnCreateCargaison = document.getElementById('btn-create-cargaison');
+        if (btnCreateCargaison) {
+            btnCreateCargaison.addEventListener('click', () => this.createCargaison());
+        }
+        // Product management
+        const produitTypeSelect = document.getElementById('produit-type');
+        if (produitTypeSelect) {
+            produitTypeSelect.addEventListener('change', () => this.handleProduitTypeChange());
+        }
+        const btnAddProduit = document.getElementById('btn-add-produit');
+        if (btnAddProduit) {
+            btnAddProduit.addEventListener('click', () => this.addProduit());
+        }
+        const btnAddAnotherProduit = document.getElementById('btn-add-another-produit');
+        if (btnAddAnotherProduit) {
+            btnAddAnotherProduit.addEventListener('click', () => this.addProduit());
+        }
     }
-    selectTransportType(type) {
+    switchTab(tab) {
+        this.currentTab = tab;
+        if (tab === 'manage') {
+            const tabContent = document.getElementById('tab-content');
+            if (tabContent) {
+                tabContent.innerHTML = '<div id="manage-view"></div>';
+                const manageContainer = document.getElementById('manage-view');
+                if (manageContainer && !this.cargaisonManager) {
+                    this.cargaisonManager = new CargaisonManager_1.CargaisonManager(manageContainer);
+                    this.cargaisonManager.init();
+                }
+                else if (manageContainer && this.cargaisonManager) {
+                    // Réinitialiser avec le nouveau container
+                    this.cargaisonManager = new CargaisonManager_1.CargaisonManager(manageContainer);
+                    this.cargaisonManager.init();
+                }
+            }
+        }
+        else {
+            this.render();
+            this.attachEventListeners();
+        }
+    }
+    selectCargaisonType(type) {
+        this.selectedCargaisonType = type;
+        const formContainer = document.getElementById('form-container');
+        const specificFields = document.getElementById('specific-fields');
+        if (formContainer) {
+            formContainer.classList.remove('hidden');
+        }
+        if (specificFields) {
+            specificFields.innerHTML = this.renderSpecificFields();
+        }
+        // Update button styles
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
-            btn.classList.remove('ring-4', 'ring-white', 'ring-opacity-50');
+            btn.classList.remove('border-blue-500', 'bg-blue-50');
+            btn.classList.add('border-gray-200');
         });
         const selectedBtn = document.getElementById(`btn-${type}`);
-        selectedBtn === null || selectedBtn === void 0 ? void 0 : selectedBtn.classList.add('ring-4', 'ring-white', 'ring-opacity-50');
-        const form = document.getElementById('initial-product-form');
-        form === null || form === void 0 ? void 0 : form.classList.remove('hidden');
-        this.updateProductOptions(type);
-    }
-    updateProductOptions(transportType) {
-        const productSelect = document.getElementById('product-type');
-        const addProductSelect = document.getElementById('add-product-type');
-        let options = '';
-        switch (transportType) {
-            case 'maritime':
-                options = `
-                    <option value="">Sélectionner un type</option>
-                    <option value="alimentaire">Alimentaire</option>
-                    <option value="chimique">Chimique</option>
-                    <option value="fragile">Matériel fragile</option>
-                    <option value="incassable">Matériel incassable</option>
-                `;
-                break;
-            case 'aerienne':
-            case 'routiere':
-                options = `
-                    <option value="">Sélectionner un type</option>
-                    <option value="alimentaire">Alimentaire</option>
-                    <option value="fragile">Matériel fragile</option>
-                    <option value="incassable">Matériel incassable</option>
-                `;
-                break;
+        if (selectedBtn) {
+            selectedBtn.classList.remove('border-gray-200');
+            selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
         }
-        if (productSelect)
-            productSelect.innerHTML = options;
-        if (addProductSelect)
-            addProductSelect.innerHTML = options;
+        // Re-attach event listeners for new elements
+        this.attachEventListeners();
     }
-    toggleToxicityField() {
-        const productType = document.getElementById('product-type').value;
-        const toxicityField = document.getElementById('toxicity-field');
-        if (productType === 'chimique') {
-            toxicityField === null || toxicityField === void 0 ? void 0 : toxicityField.classList.remove('hidden');
+    openMapForSelection(type) {
+        this.selectingFor = type;
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer) {
+            mapContainer.classList.remove('hidden');
+            if (!this.map) {
+                this.initializeMap();
+            }
+        }
+    }
+    closeMap() {
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer) {
+            mapContainer.classList.add('hidden');
+        }
+        this.selectingFor = null;
+    }
+    initializeMap() {
+        const mapElement = document.getElementById('map');
+        if (!mapElement)
+            return;
+        this.map = L.map('map').setView([36.8065, 10.1815], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(this.map);
+        this.map.on('click', (e) => {
+            if (this.selectingFor) {
+                const { lat, lng } = e.latlng;
+                this.setCoordinates(this.selectingFor, lat, lng);
+            }
+        });
+    }
+    setCoordinates(type, lat, lng) {
+        if (type === 'depart') {
+            this.coordinatesDepart = { lat, lng };
+            const latInput = document.getElementById('lat-depart');
+            const lngInput = document.getElementById('lng-depart');
+            if (latInput)
+                latInput.value = lat.toFixed(6);
+            if (lngInput)
+                lngInput.value = lng.toFixed(6);
         }
         else {
-            toxicityField === null || toxicityField === void 0 ? void 0 : toxicityField.classList.add('hidden');
+            this.coordinatesArrivee = { lat, lng };
+            const latInput = document.getElementById('lat-arrivee');
+            const lngInput = document.getElementById('lng-arrivee');
+            if (latInput)
+                latInput.value = lat.toFixed(6);
+            if (lngInput)
+                lngInput.value = lng.toFixed(6);
         }
+        if (this.map) {
+            L.marker([lat, lng]).addTo(this.map)
+                .bindPopup(`${type === 'depart' ? 'Départ' : 'Arrivée'}: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                .openPopup();
+        }
+        // Calculer et afficher la distance si les deux coordonnées sont définies
+        this.updateDistanceDisplay();
+        this.closeMap();
     }
-    toggleAddToxicityField() {
-        const productType = document.getElementById('add-product-type').value;
-        const toxicityField = document.getElementById('add-toxicity-field');
-        if (productType === 'chimique') {
-            toxicityField === null || toxicityField === void 0 ? void 0 : toxicityField.classList.remove('hidden');
+    /**
+     * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine
+     * @param lat1 Latitude du point 1 (en degrés)
+     * @param lng1 Longitude du point 1 (en degrés)
+     * @param lat2 Latitude du point 2 (en degrés)
+     * @param lng2 Longitude du point 2 (en degrés)
+     * @returns Distance en kilomètres
+     */
+    calculateHaversineDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Rayon de la Terre en kilomètres
+        // Convertir les degrés en radians
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance en kilomètres
+    }
+    /**
+     * Met à jour l'affichage de la distance calculée
+     */
+    updateDistanceDisplay() {
+        const distanceDisplay = document.getElementById('distance-display');
+        const distanceValue = document.getElementById('distance-value');
+        if (!distanceDisplay || !distanceValue)
+            return;
+        if (this.coordinatesDepart && this.coordinatesArrivee) {
+            const distance = this.calculateHaversineDistance(this.coordinatesDepart.lat, this.coordinatesDepart.lng, this.coordinatesArrivee.lat, this.coordinatesArrivee.lng);
+            distanceValue.textContent = distance.toFixed(2);
+            distanceDisplay.classList.remove('hidden');
+            // Ajouter une ligne sur la carte pour visualiser la distance
+            this.drawDistanceLine();
         }
         else {
-            toxicityField === null || toxicityField === void 0 ? void 0 : toxicityField.classList.add('hidden');
+            distanceDisplay.classList.add('hidden');
+            this.removeDistanceLine();
         }
     }
-    afficherErreur(dist, hasError) {
-        var _a, _b;
-        if (dist && !((_a = dist.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('small'))) {
-            const small = document.createElement('small');
-            small.textContent = 'Ce champ est obligatoire';
-            small.style.color = 'red';
-            small.style.fontSize = '10px';
-            (_b = dist.parentElement) === null || _b === void 0 ? void 0 : _b.appendChild(small);
+    /**
+     * Dessine une ligne sur la carte entre les points de départ et d'arrivée
+     */
+    drawDistanceLine() {
+        if (!this.map || !this.coordinatesDepart || !this.coordinatesArrivee)
+            return;
+        // Supprimer la ligne existante s'il y en a une
+        this.removeDistanceLine();
+        // Créer une nouvelle ligne
+        this.distanceLine = L.polyline([
+            [this.coordinatesDepart.lat, this.coordinatesDepart.lng],
+            [this.coordinatesArrivee.lat, this.coordinatesArrivee.lng]
+        ], {
+            color: '#3B82F6',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '10, 10'
+        }).addTo(this.map);
+        // Ajuster la vue pour montrer les deux points
+        const group = new L.featureGroup([
+            L.marker([this.coordinatesDepart.lat, this.coordinatesDepart.lng]),
+            L.marker([this.coordinatesArrivee.lat, this.coordinatesArrivee.lng])
+        ]);
+        this.map.fitBounds(group.getBounds().pad(0.1));
+    }
+    /**
+     * Supprime la ligne de distance de la carte
+     */
+    removeDistanceLine() {
+        if (this.distanceLine && this.map) {
+            this.map.removeLayer(this.distanceLine);
+            this.distanceLine = null;
         }
-        return hasError = true;
     }
     createCargaison() {
-        var _a;
+        if (!this.selectedCargaisonType) {
+            alert('Veuillez sélectionner un type de transport');
+            return;
+        }
+        if (this.produitsEnAttente.length === 0) {
+            alert('Veuillez ajouter au moins un produit à la cargaison');
+            return;
+        }
+        const numeroInput = document.getElementById('numero');
+        const poidsMaxInput = document.getElementById('poids-max');
+        if (!numeroInput || !poidsMaxInput) {
+            alert('Erreur dans le formulaire');
+            return;
+        }
+        const numero = numeroInput.value.trim();
+        const poidsMax = parseFloat(poidsMaxInput.value);
+        if (!numero || isNaN(poidsMax) || poidsMax <= 0) {
+            alert('Veuillez remplir tous les champs obligatoires');
+            return;
+        }
+        if (!this.coordinatesDepart || !this.coordinatesArrivee) {
+            alert('Veuillez sélectionner les coordonnées de départ et d\'arrivée');
+            return;
+        }
         try {
-            const transportType = (_a = document.querySelector('.cargo-type-btn.ring-4')) === null || _a === void 0 ? void 0 : _a.id.replace('btn-', '');
-            const distance = parseFloat(document.getElementById('distance').value);
-            const productType = document.getElementById('product-type').value;
-            const label = document.getElementById('product-label').value;
-            const weight = parseFloat(document.getElementById('product-weight').value);
-            const toxicity = parseInt(document.getElementById('product-toxicity').value);
-            let hasError = false;
-            const champs = [
-                { valeur: distance, id: 'distance' },
-                { valeur: productType, id: 'product-type' },
-                { valeur: label, id: 'product-label' },
-                { valeur: weight, id: 'product-weight' },
-            ];
-            for (const champ of champs) {
-                if (!champ.valeur) {
-                    const element = document.getElementById(champ.id);
-                    hasError = this.afficherErreur(element, hasError);
+            // Utiliser le premier produit comme produit initial
+            const colisInitial = this.produitsEnAttente[0];
+            // Calculer la distance avec la formule de Haversine (plus précise)
+            const distance = this.calculateHaversineDistance(this.coordinatesDepart.lat, this.coordinatesDepart.lng, this.coordinatesArrivee.lat, this.coordinatesArrivee.lng);
+            // Créer les coordonnées selon le format attendu
+            const lieuDepart = {
+                ville: "Départ", // À remplacer par la ville sélectionnée
+                latitude: this.coordinatesDepart.lat,
+                longitude: this.coordinatesDepart.lng
+            };
+            const lieuArrivee = {
+                ville: "Arrivée", // À remplacer par la ville sélectionnée
+                latitude: this.coordinatesArrivee.lat,
+                longitude: this.coordinatesArrivee.lng
+            };
+            // Utiliser le gestionnaire pour créer la cargaison
+            const cargaison = this.gestionnaire.creerCargaison(this.selectedCargaisonType, colisInitial, distance, lieuDepart, lieuArrivee);
+            // Ajouter les autres produits s'il y en a
+            for (let i = 1; i < this.produitsEnAttente.length; i++) {
+                try {
+                    cargaison.ajouterProduit(this.produitsEnAttente[i]);
+                }
+                catch (error) {
+                    console.warn(`Impossible d'ajouter le produit ${i + 1}:`, error);
+                    // Continuer même si un produit ne peut pas être ajouté
                 }
             }
-            if (!transportType || hasError) {
+            // Sauvegarder sur le serveur
+            this.saveCargaisonToServer(cargaison);
+            alert(`Cargaison créée avec succès avec ${this.produitsEnAttente.length} produit(s) !`);
+            this.resetForm();
+        }
+        catch (error) {
+            console.error('Erreur lors de la création de la cargaison:', error);
+            alert('Erreur lors de la création de la cargaison: ' + error.message);
+        }
+    }
+    saveCargaisonToServer(cargaison) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Préparer les données des colis
+                const colisData = this.produitsEnAttente.map(colis => {
+                    var _a, _b;
+                    return ({
+                        id: colis.getCode(),
+                        code: colis.getCode(),
+                        libelle: colis.getLibelle(),
+                        poids: colis.getPoids(),
+                        produit: Object.assign({ type: colis.getProduit().constructor.name.toLowerCase(), libelle: colis.getProduit().getLibelle(), poids: colis.getProduit().getPoids() }, (colis.getProduit().constructor.name === 'Chimique' && {
+                            toxicite: ((_b = (_a = colis.getProduit()).getNiveauToxicite) === null || _b === void 0 ? void 0 : _b.call(_a)) || 1
+                        })),
+                        client: {
+                            nom: colis.getClient().getNom(),
+                            prenom: colis.getClient().getPrenom(),
+                            telephone: colis.getClient().getTelephone(),
+                            adresse: colis.getClient().getAdresse(),
+                            email: colis.getClient().getEmail()
+                        },
+                        etat: 'en_attente',
+                        dateCreation: new Date().toISOString(),
+                        dateExpedition: null,
+                        dateArrivee: null,
+                        cargaisonId: cargaison.getNumero()
+                    });
+                });
+                // Sauvegarder la cargaison
+                const cargaisonResponse = yield fetch('http://localhost:3002/cargaisons', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: cargaison.getNumero(),
+                        type: this.selectedCargaisonType,
+                        numero: cargaison.getNumero(),
+                        distance: cargaison.getDistance(),
+                        lieuDepart: {
+                            ville: cargaison.getLieuDepart().ville,
+                            latitude: cargaison.getLieuDepart().latitude,
+                            longitude: cargaison.getLieuDepart().longitude
+                        },
+                        lieuArrivee: {
+                            ville: cargaison.getLieuArrivee().ville,
+                            latitude: cargaison.getLieuArrivee().latitude,
+                            longitude: cargaison.getLieuArrivee().longitude
+                        },
+                        dateCreation: new Date().toISOString(),
+                        dateDepart: null,
+                        dateArrivee: null,
+                        dateArriveeEstimee: null,
+                        etat: 'ouverte',
+                        colis: colisData.map(c => c.id),
+                        specificData: this.getSpecificData(cargaison)
+                    })
+                });
+                if (!cargaisonResponse.ok) {
+                    throw new Error('Erreur lors de la sauvegarde de la cargaison');
+                }
+                // Sauvegarder chaque colis individuellement
+                for (const colisInfo of colisData) {
+                    const colisResponse = yield fetch('http://localhost:3002/colis', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(colisInfo)
+                    });
+                    if (!colisResponse.ok) {
+                        console.warn(`Erreur lors de la sauvegarde du colis ${colisInfo.id}`);
+                    }
+                }
+            }
+            catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+            }
+        });
+    }
+    getSpecificData(cargaison) {
+        if (cargaison instanceof Maritime_1.Maritime) {
+            return {
+                nomNavire: cargaison.nomNavire,
+                portDepart: cargaison.portDepart,
+                portArrivee: cargaison.portArrivee
+            };
+        }
+        else if (cargaison instanceof Aerienne_1.Aerienne) {
+            return {
+                numeroVol: cargaison.numeroVol,
+                aeroportDepart: cargaison.aeroportDepart,
+                aeroportArrivee: cargaison.aeroportArrivee
+            };
+        }
+        else if (cargaison instanceof Routiere_1.Routiere) {
+            return {
+                immatriculation: cargaison.immatriculation,
+                nomChauffeur: cargaison.nomChauffeur
+            };
+        }
+        return {};
+    }
+    resetForm() {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input instanceof HTMLInputElement && input.type !== 'button') {
+                input.value = '';
+            }
+            else if (input instanceof HTMLSelectElement) {
+                input.value = '';
+            }
+            else if (input instanceof HTMLTextAreaElement) {
+                input.value = '';
+            }
+        });
+        // Réinitialiser les listes de produits et clients
+        this.produitsEnAttente = [];
+        this.clientsEnregistres = [];
+        // Mettre à jour l'affichage
+        this.updateProduitsDisplay();
+        this.updateCreateButton();
+        this.coordinatesDepart = null;
+        this.coordinatesArrivee = null;
+        this.selectingFor = null;
+        this.selectedCargaisonType = null;
+        // Réinitialiser la ligne de distance
+        this.removeDistanceLine();
+        document.querySelectorAll('.cargo-type-btn').forEach(btn => {
+            btn.classList.remove('border-blue-500', 'bg-blue-50');
+            btn.classList.add('border-gray-200');
+        });
+        const formContainer = document.getElementById('form-container');
+        if (formContainer) {
+            formContainer.classList.add('hidden');
+        }
+        // Masquer la section toxicité
+        const toxiciteContainer = document.getElementById('toxicite-container');
+        if (toxiciteContainer) {
+            toxiciteContainer.classList.add('hidden');
+        }
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer) {
+            mapContainer.classList.add('hidden');
+        }
+        if (this.map) {
+            this.map.eachLayer((layer) => {
+                if (layer instanceof L.Marker) {
+                    this.map.removeLayer(layer);
+                }
+            });
+        }
+    }
+    handleProduitTypeChange() {
+        const produitTypeSelect = document.getElementById('produit-type');
+        const toxiciteContainer = document.getElementById('toxicite-container');
+        if (produitTypeSelect && toxiciteContainer) {
+            if (produitTypeSelect.value === 'chimique') {
+                toxiciteContainer.classList.remove('hidden');
+                const toxiciteSelect = document.getElementById('produit-toxicite');
+                if (toxiciteSelect) {
+                    toxiciteSelect.setAttribute('required', 'required');
+                }
+            }
+            else {
+                toxiciteContainer.classList.add('hidden');
+                const toxiciteSelect = document.getElementById('produit-toxicite');
+                if (toxiciteSelect) {
+                    toxiciteSelect.removeAttribute('required');
+                    toxiciteSelect.value = '';
+                }
+            }
+        }
+    }
+    addProduit() {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        try {
+            // Récupérer les données du client
+            const clientPrenom = (_a = document.getElementById('client-prenom')) === null || _a === void 0 ? void 0 : _a.value.trim();
+            const clientNom = (_b = document.getElementById('client-nom')) === null || _b === void 0 ? void 0 : _b.value.trim();
+            const clientTelephone = (_c = document.getElementById('client-telephone')) === null || _c === void 0 ? void 0 : _c.value.trim();
+            const clientEmail = (_d = document.getElementById('client-email')) === null || _d === void 0 ? void 0 : _d.value.trim();
+            const clientAdresse = (_e = document.getElementById('client-adresse')) === null || _e === void 0 ? void 0 : _e.value.trim();
+            // Récupérer les données du produit
+            const produitLibelle = (_f = document.getElementById('produit-libelle')) === null || _f === void 0 ? void 0 : _f.value.trim();
+            const produitPoids = parseFloat(((_g = document.getElementById('produit-poids')) === null || _g === void 0 ? void 0 : _g.value) || '0');
+            const produitType = (_h = document.getElementById('produit-type')) === null || _h === void 0 ? void 0 : _h.value;
+            const produitToxicite = parseInt(((_j = document.getElementById('produit-toxicite')) === null || _j === void 0 ? void 0 : _j.value) || '0');
+            // Validation
+            if (!clientPrenom || !clientNom || !clientTelephone || !clientAdresse) {
+                alert('Veuillez remplir tous les champs obligatoires du client');
                 return;
             }
-            const initialProduct = this.createProduct(productType, label, weight, toxicity);
-            switch (transportType) {
-                case 'maritime':
-                    this.currentCargaison = new Maritime_1.Maritime(initialProduct, distance);
+            if (!produitLibelle || !produitPoids || !produitType) {
+                alert('Veuillez remplir tous les champs obligatoires du produit');
+                return;
+            }
+            if (produitType === 'chimique' && !produitToxicite) {
+                alert('Veuillez sélectionner le niveau de toxicité pour un produit chimique');
+                return;
+            }
+            // Créer le client
+            const client = new Client_1.Client(clientNom, clientPrenom, clientTelephone, clientAdresse, clientEmail || undefined);
+            // Créer le produit selon son type
+            let produit;
+            switch (produitType) {
+                case 'alimentaire':
+                    produit = new Alimentaire_1.Alimentaire(produitLibelle, produitPoids);
                     break;
-                case 'aerienne':
-                    this.currentCargaison = new Aerienne_1.Aerienne(initialProduct, distance);
+                case 'chimique':
+                    produit = new Chimique_1.Chimique(produitLibelle, produitPoids, produitToxicite);
                     break;
-                case 'routiere':
-                    this.currentCargaison = new Routiere_1.Routiere(initialProduct, distance);
+                case 'materiel-fragile':
+                    produit = new Fragile_1.Fragile(produitLibelle, produitPoids);
+                    break;
+                case 'materiel-incassable':
+                    produit = new Incassable_1.Incassable(produitLibelle, produitPoids);
                     break;
                 default:
-                    throw new Error('Type de transport non reconnu');
+                    throw new Error('Type de produit non reconnu');
             }
-            this.updateUI();
-            this.clearInitialForm();
+            // Créer le colis
+            const codeUniteForme = `COL-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+            const colis = new Colis_1.Colis(produit, codeUniteForme, client);
+            // Ajouter aux listes
+            this.produitsEnAttente.push(colis);
+            // Ajouter le client s'il n'existe pas déjà
+            const clientExiste = this.clientsEnregistres.some(c => c.getNom() === client.getNom() &&
+                c.getPrenom() === client.getPrenom() &&
+                c.getTelephone() === client.getTelephone());
+            if (!clientExiste) {
+                this.clientsEnregistres.push(client);
+            }
+            // Mettre à jour l'affichage
+            this.updateProduitsDisplay();
+            this.clearProduitForm();
+            this.updateCreateButton();
+            alert(`Produit "${produitLibelle}" ajouté avec succès!`);
         }
         catch (error) {
-            alert(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+            console.error('Erreur lors de l\'ajout du produit:', error);
+            alert('Erreur lors de l\'ajout du produit');
         }
     }
-    addProduct() {
-        if (!this.currentCargaison)
-            return;
-        try {
-            const productType = document.getElementById('add-product-type').value;
-            const label = document.getElementById('add-product-label').value;
-            const weight = parseFloat(document.getElementById('add-product-weight').value);
-            const toxicity = parseInt(document.getElementById('add-product-toxicity').value);
-            if (!productType || !label || !weight) {
-                throw new Error('Veuillez remplir tous les champs obligatoires');
+    updateProduitsDisplay() {
+        const produitsCount = document.getElementById('produits-count');
+        const produitsList = document.getElementById('produits-list');
+        const produitsContainer = document.getElementById('produits-container');
+        const btnAddAnother = document.getElementById('btn-add-another-produit');
+        if (produitsCount) {
+            produitsCount.textContent = this.produitsEnAttente.length.toString();
+        }
+        // Afficher/masquer le bouton "Ajouter un autre produit"
+        if (btnAddAnother) {
+            if (this.produitsEnAttente.length > 0) {
+                btnAddAnother.classList.remove('hidden');
             }
-            const product = this.createProduct(productType, label, weight, toxicity);
-            this.currentCargaison.ajouterProduit(product);
-            this.updateUI();
-            this.clearAddForm();
+            else {
+                btnAddAnother.classList.add('hidden');
+            }
         }
-        catch (error) {
-            alert(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
-        }
-    }
-    createProduct(type, label, weight, toxicity) {
-        switch (type) {
-            case 'alimentaire':
-                return new Alimentaire_1.Alimentaire(label, weight);
-            case 'chimique':
-                if (toxicity === undefined || isNaN(toxicity)) {
-                    throw new Error('Le degré de toxicité est requis pour les produits chimiques');
-                }
-                return new Chimique_1.Chimique(label, weight, toxicity);
-            case 'fragile':
-                return new Fragile_1.Fragile(label, weight);
-            case 'incassable':
-                return new Incassable_1.Incassable(label, weight);
-            default:
-                throw new Error('Type de produit non reconnu');
-        }
-    }
-    updateUI() {
-        var _a, _b;
-        if (!this.currentCargaison)
-            return;
-        (_a = document.getElementById('empty-state')) === null || _a === void 0 ? void 0 : _a.classList.add('hidden');
-        (_b = document.getElementById('cargo-dashboard')) === null || _b === void 0 ? void 0 : _b.classList.remove('hidden');
-        const transportType = this.currentCargaison.constructor.name.toLowerCase();
-        const icons = { maritime: 'maritime', aerienne: 'aerienne', routiere: 'routiére' };
-        const names = { maritime: 'Transport Maritime', aerienne: 'Transport Aérien', routiere: 'Transport Routier' };
-        document.getElementById('cargo-icon').textContent = icons[transportType];
-        document.getElementById('cargo-type-name').textContent = names[transportType];
-        document.getElementById('cargo-distance').textContent = `Distance: ${this.currentCargaison.getDistance()} km`;
-        document.getElementById('product-count').textContent = this.currentCargaison.nbProduit().toString();
-        document.getElementById('total-cost').textContent = `${this.currentCargaison.sommeTotale().toLocaleString()} FCFA`;
-        document.getElementById('product-counter').textContent = this.currentCargaison.nbProduit().toString();
-        this.updateSummary();
-        this.updateProductsList();
-        const headerCounter = document.querySelector('header .text-sm.text-gray-500');
-        if (headerCounter) {
-            headerCounter.textContent = `${this.currentCargaison.nbProduit()}/10 produits`;
-        }
-    }
-    updateSummary() {
-        if (!this.currentCargaison)
-            return;
-        const summarySection = document.getElementById('cargo-summary');
-        if (this.currentCargaison.nbProduit() > 0) {
-            summarySection === null || summarySection === void 0 ? void 0 : summarySection.classList.remove('hidden');
-            document.getElementById('summary-product-count').textContent = this.currentCargaison.nbProduit().toString();
-            document.getElementById('summary-distance').textContent = `${this.currentCargaison.getDistance()} km`;
-            document.getElementById('summary-total-cost').textContent = `${this.currentCargaison.sommeTotale().toLocaleString()} FCFA`;
-        }
-        else {
-            summarySection === null || summarySection === void 0 ? void 0 : summarySection.classList.add('hidden');
-        }
-    }
-    validateCargaison() {
-        var _a, _b;
-        if (!this.currentCargaison)
-            return;
-        const totalCost = this.currentCargaison.sommeTotale();
-        const productCount = this.currentCargaison.nbProduit();
-        const transportType = this.currentCargaison.constructor.name;
-        const distance = this.currentCargaison.getDistance();
-        const modalHtml = `
-            <div id="validation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
-                    <div class="text-center">
-                        <div class="text-6xl mb-4">ok</div>
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Cargaison Validée !</h2>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-                            <h3 class="font-medium text-gray-900 mb-3">Détails de la cargaison :</h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Type de transport :</span>
-                                    <span class="font-medium">${transportType}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Distance :</span>
-                                    <span class="font-medium">${distance} km</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Nombre de produits :</span>
-                                    <span class="font-medium">${productCount}</span>
-                                </div>
-                                <div class="flex justify-between border-t pt-2 mt-2">
-                                    <span class="text-gray-900 font-medium">Coût total :</span>
-                                    <span class="font-bold text-green-600">${totalCost.toLocaleString()} FCFA</span>
-                                </div>
+        if (produitsList && produitsContainer) {
+            if (this.produitsEnAttente.length > 0) {
+                produitsList.classList.remove('hidden');
+                produitsContainer.innerHTML = this.produitsEnAttente.map((colis, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${colis.getLibelle()}</div>
+                            <div class="text-sm text-gray-600">
+                                ${colis.getPoids()}kg - ${colis.getProduit().constructor.name} - 
+                                Client: ${colis.getClient().getPrenom()} ${colis.getClient().getNom()}
                             </div>
                         </div>
-                        
-                        <div class="flex gap-3">
-                            <button id="close-modal" class="flex-1 btn-primary">Fermer</button>
-                            <button id="new-cargo" class="flex-1 btn-secondary">Nouvelle cargaison</button>
-                        </div>
+                        <button onclick="appManager.removeProduit(${index})" 
+                                class="text-red-600 hover:text-red-800 px-2 py-1">
+                            ❌
+                        </button>
                     </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        (_a = document.getElementById('close-modal')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-            var _a;
-            (_a = document.getElementById('validation-modal')) === null || _a === void 0 ? void 0 : _a.remove();
-        });
-        (_b = document.getElementById('new-cargo')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
-            var _a;
-            (_a = document.getElementById('validation-modal')) === null || _a === void 0 ? void 0 : _a.remove();
-            this.resetCargaison();
-        });
-    }
-    resetCargaison() {
-        var _a, _b, _c;
-        this.currentCargaison = null;
-        (_a = document.getElementById('cargo-dashboard')) === null || _a === void 0 ? void 0 : _a.classList.add('hidden');
-        (_b = document.getElementById('empty-state')) === null || _b === void 0 ? void 0 : _b.classList.remove('hidden');
-        this.clearInitialForm();
-        this.clearAddForm();
-        document.querySelectorAll('.cargo-type-btn').forEach(btn => {
-            btn.classList.remove('ring-4', 'ring-white', 'ring-opacity-50');
-        });
-        (_c = document.getElementById('initial-product-form')) === null || _c === void 0 ? void 0 : _c.classList.add('hidden');
-        this.render();
-    }
-    updateProductsList() {
-        if (!this.currentCargaison)
-            return;
-        const productsList = document.getElementById('products-list');
-        if (!productsList)
-            return;
-        const products = this.currentCargaison.getProduits();
-        if (products.length === 0) {
-            productsList.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun produit dans la cargaison</p>';
-            return;
-        }
-        productsList.innerHTML = products.map((product, index) => {
-            const info = product.info();
-            const typeProduit = product.constructor.name.toLowerCase();
-            // Convertir les types de matériel en 'materiel' pour le calcul des frais
-            let typeForCalculation = typeProduit;
-            if (typeProduit === 'fragile' || typeProduit === 'incassable') {
-                typeForCalculation = 'materiel';
+                `).join('');
             }
-            const frais = this.currentCargaison.calculerFrais(typeForCalculation, product.getPoids());
-            const type = {
-                alimentaire: 'alimentaire',
-                chimique: 'chimique',
-                fragile: 'fragile',
-                incassable: 'incassable'
-            };
-            const typeNames = {
-                alimentaire: 'Alimentaire',
-                chimique: 'Chimique',
-                fragile: 'Matériel fragile',
-                incassable: 'Matériel incassable'
-            };
-            return `
-                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-center">
-                            <span class="text-3xl mr-4">${type[typeProduit] || 'colis'}</span>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 text-lg">${product.getLibelle()}</h4>
-                                <p class="text-sm text-gray-600 mb-1">
-                                    <span class="inline-block mr-4">${typeNames[typeProduit] || typeProduit}</span>
-                                    <span class="inline-block">${product.getPoids()} kg</span>
-                                </p>
-                                ${info.length > 2 ? `<p class="text-xs text-gray-500">${info.slice(2).join(' . ')}</p>` : ''}
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xl font-bold text-blue-600">${frais.toLocaleString()} FCFA</div>
-                            <div class="text-sm text-gray-500">Frais de transport</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
+            else {
+                produitsList.classList.add('hidden');
+            }
+        }
     }
-    clearInitialForm() {
-        var _a;
-        const inputs = ['distance', 'product-label', 'product-weight', 'product-toxicity'];
-        inputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input)
-                input.value = '';
-        });
-        const selects = ['product-type'];
-        selects.forEach(id => {
-            const select = document.getElementById(id);
-            if (select)
-                select.value = '';
-        });
-        (_a = document.getElementById('toxicity-field')) === null || _a === void 0 ? void 0 : _a.classList.add('hidden');
+    clearProduitForm() {
+        // Vider les champs du produit uniquement, pas du client
+        const produitLibelle = document.getElementById('produit-libelle');
+        const produitPoids = document.getElementById('produit-poids');
+        const produitType = document.getElementById('produit-type');
+        const produitToxicite = document.getElementById('produit-toxicite');
+        if (produitLibelle)
+            produitLibelle.value = '';
+        if (produitPoids)
+            produitPoids.value = '';
+        if (produitType)
+            produitType.value = '';
+        if (produitToxicite)
+            produitToxicite.value = '';
+        // Masquer la section toxicité
+        const toxiciteContainer = document.getElementById('toxicite-container');
+        if (toxiciteContainer) {
+            toxiciteContainer.classList.add('hidden');
+        }
     }
-    clearAddForm() {
-        var _a;
-        const inputs = ['add-product-label', 'add-product-weight', 'add-product-toxicity'];
-        inputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input)
-                input.value = '';
-        });
-        const selects = ['add-product-type'];
-        selects.forEach(id => {
-            const select = document.getElementById(id);
-            if (select)
-                select.value = '';
-        });
-        (_a = document.getElementById('add-toxicity-field')) === null || _a === void 0 ? void 0 : _a.classList.add('hidden');
+    updateCreateButton() {
+        const btnCreateCargaison = document.getElementById('btn-create-cargaison');
+        if (btnCreateCargaison) {
+            btnCreateCargaison.disabled = this.produitsEnAttente.length === 0;
+        }
+    }
+    removeProduit(index) {
+        if (index >= 0 && index < this.produitsEnAttente.length) {
+            this.produitsEnAttente.splice(index, 1);
+            this.updateProduitsDisplay();
+            this.updateCreateButton();
+        }
     }
 }
 exports.AppManager = AppManager;

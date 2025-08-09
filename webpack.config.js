@@ -25,7 +25,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: './src/index.html',
+            template: './public/index.html',
             title: 'Gestionnaire de Cargaison',
         }),
     ],
@@ -34,7 +34,7 @@ module.exports = {
             directory: path.join(__dirname, 'dist'),
         },
         compress: true,
-        port: 3000,
+        port: 3003,
         open: true,
     },
 };

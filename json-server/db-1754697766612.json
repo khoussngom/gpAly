@@ -1,0 +1,183 @@
+{
+  "cargaisons": [
+    {
+      "id": "CAR-1691234567890-1234",
+      "type": "maritime",
+      "numero": "CAR-1691234567890-1234",
+      "distance": 1000,
+      "lieuDepart": {
+        "ville": "Dakar",
+        "latitude": 14.6928,
+        "longitude": -17.4467
+      },
+      "lieuArrivee": {
+        "ville": "Abidjan",
+        "latitude": 5.36,
+        "longitude": -4.0083
+      },
+      "dateCreation": "2024-08-08T10:00:00.000Z",
+      "dateDepart": "2024-08-10T08:00:00.000Z",
+      "dateArrivee": null,
+      "dateArriveeEstimee": "2024-08-15T18:00:00.000Z",
+      "etat": "en_transit",
+      "colis": [
+        "COL-1691234567890-5678"
+      ]
+    },
+    {
+      "id": "CAR-1691234567890-2345",
+      "type": "aerienne",
+      "numero": "CAR-1691234567890-2345",
+      "distance": 2500,
+      "lieuDepart": {
+        "ville": "Casablanca",
+        "latitude": 33.5731,
+        "longitude": -7.5898
+      },
+      "lieuArrivee": {
+        "ville": "Lagos",
+        "latitude": 6.5244,
+        "longitude": 3.3792
+      },
+      "dateCreation": "2024-08-07T14:30:00.000Z",
+      "dateDepart": "2024-08-09T06:00:00.000Z",
+      "dateArrivee": "2024-08-09T12:30:00.000Z",
+      "dateArriveeEstimee": "2024-08-09T12:00:00.000Z",
+      "etat": "arrivee",
+      "colis": [
+        "COL-1691234567890-9876"
+      ]
+    },
+    {
+      "id": "CAR-1691234567890-3456",
+      "type": "routiere",
+      "numero": "CAR-1691234567890-3456",
+      "distance": 800,
+      "lieuDepart": {
+        "ville": "Accra",
+        "latitude": 5.6037,
+        "longitude": -0.187
+      },
+      "lieuArrivee": {
+        "ville": "Abidjan",
+        "latitude": 5.36,
+        "longitude": -4.0083
+      },
+      "dateCreation": "2024-08-08T16:00:00.000Z",
+      "dateDepart": null,
+      "dateArrivee": null,
+      "dateArriveeEstimee": null,
+      "etat": "ouverte",
+      "colis": []
+    }
+  ],
+  "colis": [
+    {
+      "id": "COL-1691234567890-5678",
+      "code": "COL-1691234567890-5678",
+      "libelle": "Riz basmati",
+      "poids": 25,
+      "produit": {
+        "type": "alimentaire",
+        "libelle": "Riz basmati",
+        "poids": 25
+      },
+      "client": {
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "telephone": "+221 77 123 45 67",
+        "adresse": "123 Rue de la Paix, Dakar",
+        "email": "jean.dupont@email.com"
+      },
+      "etat": "en_transit",
+      "dateCreation": "2024-08-08T10:00:00.000Z",
+      "dateExpedition": "2024-08-10T08:00:00.000Z",
+      "dateArrivee": null,
+      "cargaisonId": "CAR-1691234567890-1234"
+    },
+    {
+      "id": "COL-1691234567890-9876",
+      "code": "COL-1691234567890-9876",
+      "libelle": "Ordinateur portable",
+      "poids": 2.5,
+      "produit": {
+        "type": "fragile",
+        "libelle": "Ordinateur portable",
+        "poids": 2.5
+      },
+      "client": {
+        "nom": "Diallo",
+        "prenom": "Aminata",
+        "telephone": "+212 66 987 65 43",
+        "adresse": "45 Avenue Hassan II, Casablanca",
+        "email": "aminata.diallo@email.ma"
+      },
+      "etat": "arrive",
+      "dateCreation": "2024-08-07T14:30:00.000Z",
+      "dateExpedition": "2024-08-09T06:00:00.000Z",
+      "dateArrivee": "2024-08-09T12:30:00.000Z",
+      "cargaisonId": "CAR-1691234567890-2345"
+    },
+    {
+      "id": "COL-1691234567890-1111",
+      "code": "COL-1691234567890-1111",
+      "libelle": "Médicaments",
+      "poids": 5,
+      "produit": {
+        "type": "chimique",
+        "libelle": "Médicaments",
+        "poids": 5,
+        "toxicite": 2
+      },
+      "client": {
+        "nom": "Kone",
+        "prenom": "Ibrahim",
+        "telephone": "+233 24 555 77 88",
+        "adresse": "12 Ring Road, Accra",
+        "email": "ibrahim.kone@email.gh"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2024-08-08T16:00:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": "CAR-1691234567890-3456"
+    }
+  ],
+  "coordonnees": [
+    {
+      "id": 1,
+      "ville": "Dakar",
+      "pays": "Sénégal",
+      "latitude": 14.6928,
+      "longitude": -17.4467
+    },
+    {
+      "id": 2,
+      "ville": "Abidjan",
+      "pays": "Côte d'Ivoire",
+      "latitude": 5.36,
+      "longitude": -4.0083
+    },
+    {
+      "id": 3,
+      "ville": "Casablanca",
+      "pays": "Maroc",
+      "latitude": 33.5731,
+      "longitude": -7.5898
+    },
+    {
+      "id": 4,
+      "ville": "Lagos",
+      "pays": "Nigeria",
+      "latitude": 6.5244,
+      "longitude": 3.3792
+    },
+    {
+      "id": 5,
+      "ville": "Accra",
+      "pays": "Ghana",
+      "latitude": 5.6037,
+      "longitude": -0.187
+    }
+  ]
+}

@@ -1,6 +1,12 @@
-import { Cargaison } from "./Cargaison";
+import { Cargaison, Coordonnee } from "./Cargaison";
+import { Colis } from "./Colis";
 
 export class Maritime extends Cargaison {
+    constructor(produitInitial: Colis, distance: number, lieuDepart: Coordonnee, lieuArrivee: Coordonnee) {
+        super(produitInitial, distance, lieuDepart, lieuArrivee);
+        this.poidsMax = 2000;
+    }
+
     public calculerFrais(type: 'alimentaire' | 'chimique' | 'materiel', poids: number): number {
         switch(type) {
             case 'alimentaire':
@@ -13,5 +19,4 @@ export class Maritime extends Cargaison {
                 throw new Error("Type de produit non reconnu");
         }
     }
-
 }
