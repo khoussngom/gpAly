@@ -8,7 +8,6 @@ class Routiere extends Cargaison_1.Cargaison {
         this.poidsMax = 1500;
     }
     calculerDureeEstimee() {
-        // Transport routier : 80 km/h en moyenne
         return Math.ceil(this.distance / 80);
     }
     obtenirSpecificites() {

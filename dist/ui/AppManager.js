@@ -501,14 +501,6 @@ class AppManager {
         this.updateDistanceDisplay();
         this.closeMap();
     }
-    /**
-     * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine
-     * @param lat1 Latitude du point 1 (en degrés)
-     * @param lng1 Longitude du point 1 (en degrés)
-     * @param lat2 Latitude du point 2 (en degrés)
-     * @param lng2 Longitude du point 2 (en degrés)
-     * @returns Distance en kilomètres
-     */
     calculateHaversineDistance(lat1, lng1, lat2, lng2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -598,7 +590,6 @@ class AppManager {
                 latitude: this.coordinatesArrivee.lat,
                 longitude: this.coordinatesArrivee.lng
             };
-            // Créer la cargaison directement selon le type
             let cargaison;
             switch (this.selectedCargaisonType) {
                 case 'maritime':
@@ -613,7 +604,6 @@ class AppManager {
                 default:
                     throw new Error('Type de cargaison non supporté');
             }
-            // Ajouter à la liste des cargaisons
             this.cargaisons.push(cargaison);
             for (let i = 1; i < this.produitsEnAttente.length; i++) {
                 try {
@@ -762,7 +752,6 @@ class AppManager {
         if (formContainer) {
             formContainer.classList.add('hidden');
         }
-        // Masquer la section toxicité
         const toxiciteContainer = document.getElementById('toxicite-container');
         if (toxiciteContainer) {
             toxiciteContainer.classList.add('hidden');

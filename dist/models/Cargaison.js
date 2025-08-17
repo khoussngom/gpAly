@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Cargaison = exports.FRAIS_TRANSPORT = exports.TypeCargaison = exports.EtatCargaison = void 0;
+const Colis_1 = require("./Colis");
 var EtatCargaison;
 (function (EtatCargaison) {
     EtatCargaison["EN_ATTENTE"] = "EN_ATTENTE";
@@ -14,10 +15,9 @@ var TypeCargaison;
     TypeCargaison["MARITIME"] = "maritime";
     TypeCargaison["AERIENNE"] = "aerienne";
 })(TypeCargaison || (exports.TypeCargaison = TypeCargaison = {}));
-// Grille des frais de transport selon les règles
 exports.FRAIS_TRANSPORT = {
     alimentaire: { routiere: 100, maritime: 90, aerienne: 300, autresFrais: 5000 },
-    chimique: { routiere: 0, maritime: 500, aerienne: 0, autresFrais: 10000 }, // routière et aérienne interdites
+    chimique: { routiere: 0, maritime: 500, aerienne: 0, autresFrais: 10000 },
     materiel: { routiere: 200, maritime: 400, aerienne: 1000, autresFrais: 0 }
 };
 class Cargaison {
@@ -41,14 +41,12 @@ class Cargaison {
             console.warn('Cannot add colis to closed cargaison');
             return false;
         }
-        // Vérifier la capacité
         const poidsTotal = this.produits.reduce((total, c) => total + c.getPoids(), 0);
         const nouveauPoids = poidsTotal + colis.getPoids();
         if (nouveauPoids > this.poidsMax) {
             console.warn(`Capacité dépassée. Poids actuel: ${poidsTotal}kg, tentative d'ajout: ${colis.getPoids()}kg, capacité max: ${this.poidsMax}kg`);
             return false;
         }
-        // Vérifier la compatibilité des produits
         const produitToCheck = colis.getProduit();
         if (!this.verifierCompatibiliteProduit(produitToCheck)) {
             const typeProduit = produitToCheck.constructor.name.toLowerCase();
@@ -56,7 +54,6 @@ class Cargaison {
             return false;
         }
         this.produits.push(colis);
-        // Calculer et afficher les frais pour ce colis
         const produit = colis.getProduit();
         const typeProduit = produit.constructor.name.toLowerCase();
         const frais = this.calculerFrais(typeProduit, produit.getPoids());
@@ -68,12 +65,11 @@ class Cargaison {
     verifierCompatibiliteProduit(produit) {
         const typeProduit = produit.constructor.name.toLowerCase();
         const typeTransport = this.type;
-        // Règles métier
         if (typeProduit === 'chimique' && typeTransport !== 'maritime') {
-            return false; // Les produits chimiques doivent toujours transiter par voie maritime
+            return false;
         }
         if (typeProduit === 'fragile' && typeTransport === 'maritime') {
-            return false; // Les produits fragiles ne doivent jamais passer par voie maritime
+            return false;
         }
         return true;
     }
@@ -88,12 +84,10 @@ class Cargaison {
     }
     calculerFrais(typeProduit, poids) {
         const typeTransport = this.getTypeCargaison();
-        // Gestion des types composites
         let typeForCalculation = typeProduit;
         if (typeProduit === 'fragile' || typeProduit === 'incassable') {
             typeForCalculation = 'materiel';
         }
-        // Accès sécurisé aux frais
         const fraisType = exports.FRAIS_TRANSPORT[typeForCalculation];
         if (!fraisType)
             return 0;
@@ -134,7 +128,6 @@ class Cargaison {
             etat: this.etatAvancement
         };
     }
-    // Getters
     getNumero() { return this.numero; }
     getProduits() { return this.produits; }
     getDistance() { return this.distance; }
@@ -145,7 +138,48 @@ class Cargaison {
     getEtatAvancement() { return this.etatAvancement; }
     getDateDepart() { return this.dateDepart; }
     getDateArrivee() { return this.dateArrivee; }
-    // Setters
+    // Méthodes ajoutées pour compatibilité
+    getType() { return this.type; }
+    getPoidsTotal() {
+        return this.produits.reduce((total, colis) => total + colis.getPoids(), 0);
+    }
+    nbProduit() { return this.produits.length; }
+    estOuverte() { return !this.estFermee; }
+    sommeTotale() { return this.calculerMontantTotal(); }
+    ajouterProduit(colis) {
+        return this.ajouterColis(colis);
+    }
+    rechercherColis(code) {
+        return this.produits.find(colis => colis.getCode() === code) || null;
+    }
+    rouvrirCargaison() {
+        this.estFermee = false;
+        this.etatAvancement = EtatCargaison.EN_ATTENTE;
+    }
+    recupererColis(codeColis) {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(Colis_1.EtatColis.RECUPERE);
+            return true;
+        }
+        return false;
+    }
+    marquerColisCommePerdu(codeColis) {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(Colis_1.EtatColis.PERDU);
+            return true;
+        }
+        return false;
+    }
+    archiverColis(codeColis) {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(Colis_1.EtatColis.ARCHIVE);
+            return true;
+        }
+        return false;
+    }
     setEtatAvancement(etat) { this.etatAvancement = etat; }
     setDateArrivee(date) { this.dateArrivee = date; }
 }

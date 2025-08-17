@@ -180,6 +180,55 @@ export abstract class Cargaison {
     public getDateDepart(): Date | undefined { return this.dateDepart; }
     public getDateArrivee(): Date | undefined { return this.dateArrivee; }
 
+    // Méthodes ajoutées pour compatibilité
+    public getType(): string { return this.type; }
+    public getPoidsTotal(): number { 
+        return this.produits.reduce((total, colis) => total + colis.getPoids(), 0);
+    }
+    public nbProduit(): number { return this.produits.length; }
+    public estOuverte(): boolean { return !this.estFermee; }
+    public sommeTotale(): number { return this.calculerMontantTotal(); }
+    
+    public ajouterProduit(colis: Colis): boolean {
+        return this.ajouterColis(colis);
+    }
+    
+    public rechercherColis(code: string): Colis | null {
+        return this.produits.find(colis => colis.getCode() === code) || null;
+    }
+    
+    public rouvrirCargaison(): void {
+        this.estFermee = false;
+        this.etatAvancement = EtatCargaison.EN_ATTENTE;
+    }
+    
+    public recupererColis(codeColis: string): boolean {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(EtatColis.RECUPERE);
+            return true;
+        }
+        return false;
+    }
+    
+    public marquerColisCommePerdu(codeColis: string): boolean {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(EtatColis.PERDU);
+            return true;
+        }
+        return false;
+    }
+    
+    public archiverColis(codeColis: string): boolean {
+        const colis = this.rechercherColis(codeColis);
+        if (colis) {
+            colis.setEtat(EtatColis.ARCHIVE);
+            return true;
+        }
+        return false;
+    }
+
     public setEtatAvancement(etat: EtatCargaison): void { this.etatAvancement = etat; }
     public setDateArrivee(date: Date): void { this.dateArrivee = date; }
 

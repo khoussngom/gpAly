@@ -8,7 +8,6 @@ class Maritime extends Cargaison_1.Cargaison {
         this.poidsMax = 2000;
     }
     calculerDureeEstimee() {
-        // Transport maritime : 30 km/h en moyenne
         return Math.ceil(this.distance / 30);
     }
     obtenirSpecificites() {

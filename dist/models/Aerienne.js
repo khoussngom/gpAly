@@ -8,7 +8,6 @@ class Aerienne extends Cargaison_1.Cargaison {
         this.poidsMax = 500;
     }
     calculerDureeEstimee() {
-        // Transport aérien : 800 km/h en moyenne
         return Math.ceil(this.distance / 800);
     }
     obtenirSpecificites() {

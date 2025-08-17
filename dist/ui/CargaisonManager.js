@@ -543,7 +543,6 @@ class CargaisonManager {
                 if (!colisResponse.ok) {
                     throw new Error('Erreur lors de l\'ajout du colis');
                 }
-                // Mettre à jour la cargaison pour ajouter le colis à la liste
                 const cargaisonResponse = yield fetch(`${this.apiUrl}/cargaisons/${this.currentCargaisonId}`);
                 const cargaison = yield cargaisonResponse.json();
                 const updatedColis = [...cargaison.colis, code];
