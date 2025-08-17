@@ -496,7 +496,7 @@
     </footer>
 
     <script>
-        const API_BASE = '/api';
+        const API_BASE = 'http://localhost:3002';
         let authToken = localStorage.getItem('adminToken');
         let currentAdmin = null;
 
@@ -627,20 +627,35 @@
             }
             
             try {
-                const params = new URLSearchParams();
-                if (code) params.append('code', code);
-                if (nom) params.append('nom', nom);
-                if (prenom) params.append('prenom', prenom);
+                let response;
+                let results = [];
                 
-                const response = await fetch(`${API_BASE}/colis/search?${params}`);
-                const data = await response.json();
+                if (code) {
+                    // Recherche par code
+                    response = await fetch(`${API_BASE}/colis?code=${encodeURIComponent(code)}`);
+                    if (response.ok) {
+                        const colis = await response.json();
+                        results = colis;
+                    }
+                } else if (nom && prenom) {
+                    // Recherche par nom et prénom
+                    response = await fetch(`${API_BASE}/colis`);
+                    if (response.ok) {
+                        const allColis = await response.json();
+                        results = allColis.filter(c => 
+                            c.client.nom.toLowerCase().includes(nom.toLowerCase()) && 
+                            c.client.prenom.toLowerCase().includes(prenom.toLowerCase())
+                        );
+                    }
+                }
                 
-                if (response.ok) {
-                    displaySearchResults(data.results);
+                if (response && response.ok) {
+                    displaySearchResults(results);
                 } else {
-                    alert('Erreur: ' + data.error);
+                    throw new Error('Erreur lors de la recherche');
                 }
             } catch (error) {
+                console.error('Erreur de recherche:', error);
                 alert('Erreur de connexion: ' + error.message);
             }
         }
@@ -652,7 +667,7 @@
             if (results.length === 0) {
                 container.innerHTML = '<p class="text-gray-600 text-center py-8">Aucun colis trouvé</p>';
             } else {
-                container.innerHTML = results.map(result => `
+                container.innerHTML = results.map(colis => `
                     <div class="border border-gray-200 rounded-lg p-6 mb-4 card-hover">
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
@@ -661,11 +676,13 @@
                                     Informations du Colis
                                 </h4>
                                 <div class="space-y-2 text-sm">
-                                    <p><strong>Code:</strong> ${result.colis.code}</p>
-                                    <p><strong>Libellé:</strong> ${result.colis.libelle}</p>
-                                    <p><strong>Poids:</strong> ${result.colis.poids} kg</p>
-                                    <p><strong>État:</strong> <span class="px-2 py-1 rounded text-xs font-medium ${getStatusColor(result.colis.etat)}">${result.colis.etat}</span></p>
-                                    <p><strong>Date création:</strong> ${new Date(result.colis.dateCreation).toLocaleDateString('fr-FR')}</p>
+                                    <p><strong>Code:</strong> ${colis.code}</p>
+                                    <p><strong>Libellé:</strong> ${colis.libelle}</p>
+                                    <p><strong>Poids:</strong> ${colis.poids} kg</p>
+                                    <p><strong>État:</strong> <span class="px-2 py-1 rounded text-xs font-medium ${getStatusColor(colis.etat)}">${getEtatLabel(colis.etat)}</span></p>
+                                    <p><strong>Date création:</strong> ${new Date(colis.dateCreation).toLocaleDateString('fr-FR')}</p>
+                                    ${colis.dateExpedition ? `<p><strong>Date expédition:</strong> ${new Date(colis.dateExpedition).toLocaleDateString('fr-FR')}</p>` : ''}
+                                    ${colis.dateArrivee ? `<p><strong>Date arrivée:</strong> ${new Date(colis.dateArrivee).toLocaleDateString('fr-FR')}</p>` : ''}
                                 </div>
                             </div>
                             <div>
@@ -674,29 +691,20 @@
                                     Client
                                 </h4>
                                 <div class="space-y-2 text-sm">
-                                    <p><strong>Nom:</strong> ${result.colis.client.nom} ${result.colis.client.prenom}</p>
-                                    <p><strong>Téléphone:</strong> ${result.colis.client.telephone}</p>
-                                    <p><strong>Email:</strong> ${result.colis.client.email || 'Non renseigné'}</p>
-                                    <p><strong>Adresse:</strong> ${result.colis.client.adresse}</p>
+                                    <p><strong>Nom:</strong> ${colis.client.prenom} ${colis.client.nom}</p>
+                                    <p><strong>Téléphone:</strong> ${colis.client.telephone}</p>
+                                    <p><strong>Email:</strong> ${colis.client.email || 'Non renseigné'}</p>
+                                    <p><strong>Adresse:</strong> ${colis.client.adresse}</p>
                                 </div>
                             </div>
                         </div>
-                        ${result.cargaison ? `
-                            <div class="mt-6 pt-4 border-t border-gray-200">
-                                <h4 class="font-bold text-lg text-purple-600 mb-3 flex items-center">
-                                    <i class="bx bx-cube mr-2"></i>
-                                    Cargaison
-                                </h4>
-                                <div class="grid md:grid-cols-3 gap-4 text-sm">
-                                    <p><strong>Numéro:</strong> ${result.cargaison.numero}</p>
-                                    <p><strong>Type:</strong> ${result.cargaison.type}</p>
-                                    <p><strong>État:</strong> <span class="px-2 py-1 rounded text-xs font-medium ${getStatusColor(result.cargaison.etat)}">${result.cargaison.etat}</span></p>
-                                    <p><strong>Départ:</strong> ${result.cargaison.lieuDepart.ville}</p>
-                                    <p><strong>Arrivée:</strong> ${result.cargaison.lieuArrivee.ville}</p>
-                                    <p><strong>Distance:</strong> ${result.cargaison.distance} km</p>
-                                </div>
-                            </div>
-                        ` : ''}
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-center">
+                            <button onclick="showColisDetailFromSearch('${colis.code}')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <i class="bx bx-info-circle"></i>
+                                <span>Voir les détails complets</span>
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -707,11 +715,37 @@
 
         function getStatusColor(status) {
             switch (status.toLowerCase()) {
+                case 'en_attente': return 'bg-yellow-100 text-yellow-800';
                 case 'en_transit': return 'bg-blue-100 text-blue-800';
                 case 'arrive': case 'arrivee': return 'bg-green-100 text-green-800';
-                case 'en_attente': return 'bg-yellow-100 text-yellow-800';
-                case 'ouverte': return 'bg-gray-100 text-gray-800';
+                case 'perdu': return 'bg-red-100 text-red-800';
+                case 'annule': case 'annulee': return 'bg-gray-100 text-gray-800';
+                case 'ouverte': return 'bg-green-100 text-green-800';
+                case 'fermee': return 'bg-blue-100 text-blue-800';
                 default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getEtatLabel(etat) {
+            switch(etat) {
+                case 'en_attente': return 'En attente';
+                case 'en_transit': return 'En transit';
+                case 'arrive': return 'Arrivé';
+                case 'perdu': return 'Perdu';
+                case 'annule': return 'Annulé';
+                case 'ouverte': return 'Ouverte';
+                case 'fermee': return 'Fermée';
+                case 'arrivee': return 'Arrivée';
+                case 'annulee': return 'Annulée';
+                default: return etat;
+            }
+        }
+
+        function showColisDetailFromSearch(code) {
+            if (typeof window.detailsManager !== 'undefined') {
+                window.detailsManager.showColisDetail(code);
+            } else {
+                alert(`Détail du colis ${code} - DetailsManager non disponible`);
             }
         }
 
@@ -813,12 +847,8 @@
         async function loadDashboardStats() {
             try {
                 const [cargaisonsRes, colisRes] = await Promise.all([
-                    fetch(`${API_BASE}/cargaisons`, {
-                        headers: { 'Authorization': `Bearer ${authToken}` }
-                    }),
-                    fetch(`${API_BASE}/colis`, {
-                        headers: { 'Authorization': `Bearer ${authToken}` }
-                    })
+                    fetch(`${API_BASE}/cargaisons`),
+                    fetch(`${API_BASE}/colis`)
                 ]);
                 
                 if (!cargaisonsRes.ok || !colisRes.ok) {
@@ -912,9 +942,7 @@
 
         async function loadCargaisons() {
             try {
-                const response = await fetch(`${API_BASE}/cargaisons`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const response = await fetch(`${API_BASE}/cargaisons`);
                 
                 if (!response.ok) {
                     throw new Error('API non disponible');
@@ -1040,9 +1068,7 @@
 
         async function loadColis() {
             try {
-                const response = await fetch(`${API_BASE}/colis`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const response = await fetch(`${API_BASE}/colis`);
                 
                 if (!response.ok) {
                     throw new Error('API non disponible');
@@ -1203,12 +1229,8 @@
         async function loadDetailedStats() {
             try {
                 const [cargaisonsRes, colisRes] = await Promise.all([
-                    fetch(`${API_BASE}/cargaisons`, {
-                        headers: { 'Authorization': `Bearer ${authToken}` }
-                    }),
-                    fetch(`${API_BASE}/colis`, {
-                        headers: { 'Authorization': `Bearer ${authToken}` }
-                    })
+                    fetch(`${API_BASE}/cargaisons`),
+                    fetch(`${API_BASE}/colis`)
                 ]);
                 
                 const cargaisons = await cargaisonsRes.json();
@@ -1273,32 +1295,69 @@
         }
 
         function showCargaisonDetail(numero) {
-            alert(`Détail de la cargaison ${numero} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.showCargaisonDetail(numero);
+            } else {
+                alert(`Détail de la cargaison ${numero} - DetailsManager non disponible`);
+            }
         }
 
         function showColisDetail(code) {
-            alert(`Détail du colis ${code} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.showColisDetail(code);
+            } else {
+                alert(`Détail du colis ${code} - DetailsManager non disponible`);
+            }
         }
 
         function editCargaison(numero) {
-            alert(`Édition de la cargaison ${numero} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.editCargaison(numero);
+            } else {
+                alert(`Édition de la cargaison ${numero} - DetailsManager non disponible`);
+            }
         }
 
         function editColis(code) {
-            alert(`Édition du colis ${code} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.editColis(code);
+            } else {
+                alert(`Édition du colis ${code} - DetailsManager non disponible`);
+            }
         }
 
         function deleteCargaison(numero) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer la cargaison ${numero} ?`)) {
-                alert(`Suppression de la cargaison ${numero} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.deleteCargaison(numero);
+            } else {
+                if (confirm(`Êtes-vous sûr de vouloir supprimer la cargaison ${numero} ?`)) {
+                    alert(`Suppression de la cargaison ${numero} - DetailsManager non disponible`);
+                }
             }
         }
 
         function deleteColis(code) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer le colis ${code} ?`)) {
-                alert(`Suppression du colis ${code} - À implémenter`);
+            if (window.detailsManager) {
+                window.detailsManager.deleteColis(code);
+            } else {
+                if (confirm(`Êtes-vous sûr de vouloir supprimer le colis ${code} ?`)) {
+                    alert(`Suppression du colis ${code} - DetailsManager non disponible`);
+                }
             }
         }
+
+        // Fonctions de rafraîchissement des listes
+        function refreshCargaisonsList() {
+            showCargaisonsList();
+        }
+
+        function refreshColisList() {
+            showColisList();
+        }
+
+        // Rendre les fonctions disponibles globalement
+        window.refreshCargaisonsList = refreshCargaisonsList;
+        window.refreshColisList = refreshColisList;
 
         function showCreateCargaison() {
             setActiveMenu('menu-cargaisons');

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test avec Données API Réelles</title>
+    <script src="../dist/main.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .data-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-button {
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Test des Fonctionnalités avec Données API</h1>
+                <p class="text-lg text-gray-600">Test des fonctions dynamiques avec les vraies données de db.json</p>
+            </div>
+
+            <!-- Status Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+                    Status du Système
+                </h2>
+                <div id="status" class="text-gray-600">
+                    Initialisation en cours...
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Cargaisons -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="data-card p-6">
+                        <h2 class="text-2xl font-bold mb-2">🚢 Cargaisons Réelles</h2>
+                        <p class="text-blue-100">Test avec données de l'API</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <!-- CAR-1691234567890-1234 (Maritime, En transit) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">CAR-1691234567890-1234</h3>
+                                    <p class="text-sm text-gray-600">Maritime • Dakar → Abidjan</p>
+                                    <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full mt-1">
+                                        En transit
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowCargaisonDetail('CAR-1691234567890-1234')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditCargaison('CAR-1691234567890-1234')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteCargaison('CAR-1691234567890-1234')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CAR-1691234567890-2345 (Aérienne, Arrivée) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">CAR-1691234567890-2345</h3>
+                                    <p class="text-sm text-gray-600">Aérienne • Casablanca → Lagos</p>
+                                    <span class="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full mt-1">
+                                        Arrivée
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowCargaisonDetail('CAR-1691234567890-2345')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditCargaison('CAR-1691234567890-2345')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteCargaison('CAR-1691234567890-2345')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CAR-1691234567890-3456 (Routière, Ouverte) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">CAR-1691234567890-3456</h3>
+                                    <p class="text-sm text-gray-600">Routière • Accra → Abidjan</p>
+                                    <span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full mt-1">
+                                        Ouverte
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowCargaisonDetail('CAR-1691234567890-3456')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditCargaison('CAR-1691234567890-3456')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteCargaison('CAR-1691234567890-3456')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colis -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="data-card p-6">
+                        <h2 class="text-2xl font-bold mb-2">📦 Colis Réels</h2>
+                        <p class="text-blue-100">Test avec données de l'API</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <!-- COL-1691234567890-5678 (Riz basmati, En transit) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">COL-1691234567890-5678</h3>
+                                    <p class="text-sm text-gray-600">Riz basmati • 25kg • Jean Dupont</p>
+                                    <span class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full mt-1">
+                                        En transit
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowColisDetail('COL-1691234567890-5678')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditColis('COL-1691234567890-5678')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteColis('COL-1691234567890-5678')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- COL-1691234567890-9876 (Ordinateur portable, Arrivé) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">COL-1691234567890-9876</h3>
+                                    <p class="text-sm text-gray-600">Ordinateur portable • 2.5kg • Aminata Diallo</p>
+                                    <span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full mt-1">
+                                        Arrivé
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowColisDetail('COL-1691234567890-9876')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditColis('COL-1691234567890-9876')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteColis('COL-1691234567890-9876')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- COL-1691234567890-1111 (Médicaments, En attente) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">COL-1691234567890-1111</h3>
+                                    <p class="text-sm text-gray-600">Médicaments • 5kg • Ibrahim Kone</p>
+                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full mt-1">
+                                        En attente
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowColisDetail('COL-1691234567890-1111')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditColis('COL-1691234567890-1111')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteColis('COL-1691234567890-1111')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- COL-1754697892136-3226 (Sac, En attente) -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">COL-1754697892136-3226</h3>
+                                    <p class="text-sm text-gray-600">Sac • 2kg • Khouss Ngom</p>
+                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full mt-1">
+                                        En attente
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="testShowColisDetail('COL-1754697892136-3226')" 
+                                        class="test-button bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Détails
+                                </button>
+                                <button onclick="testEditColis('COL-1754697892136-3226')" 
+                                        class="test-button bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Modifier
+                                </button>
+                                <button onclick="testDeleteColis('COL-1754697892136-3226')" 
+                                        class="test-button bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🚀 Actions Rapides</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="testApiConnection()" 
+                            class="test-button bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium">
+                        Test API
+                    </button>
+                    <button onclick="loadAllCargaisons()" 
+                            class="test-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium">
+                        Charger Cargaisons
+                    </button>
+                    <button onclick="loadAllColis()" 
+                            class="test-button bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium">
+                        Charger Colis
+                    </button>
+                    <button onclick="clearStatus()" 
+                            class="test-button bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium">
+                        Effacer Log
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logCount = 0;
+        
+        function updateStatus(message, type = 'info') {
+            logCount++;
+            const status = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': 'text-blue-600',
+                'success': 'text-green-600',
+                'error': 'text-red-600',
+                'warning': 'text-yellow-600'
+            };
+            
+            const newLog = `<div class="border-l-4 border-gray-200 pl-4 py-2">
+                <div class="flex justify-between items-start">
+                    <span class="${colors[type]} font-medium">[${logCount}] ${message}</span>
+                    <span class="text-xs text-gray-400">${timestamp}</span>
+                </div>
+            </div>`;
+            
+            status.innerHTML = newLog + status.innerHTML;
+        }
+        
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '<div class="text-gray-500">Log effacé</div>';
+            logCount = 0;
+        }
+        
+        // Tests des fonctions avec vraies données
+        function testShowCargaisonDetail(numero) {
+            updateStatus(`Test: showCargaisonDetail('${numero}')`, 'info');
+            if (window.detailsManager) {
+                window.detailsManager.showCargaisonDetail(numero);
+                updateStatus(`✅ Modal détail cargaison ${numero} ouverte`, 'success');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        function testShowColisDetail(code) {
+            updateStatus(`Test: showColisDetail('${code}')`, 'info');
+            if (window.detailsManager) {
+                window.detailsManager.showColisDetail(code);
+                updateStatus(`✅ Modal détail colis ${code} ouverte`, 'success');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        function testEditCargaison(numero) {
+            updateStatus(`Test: editCargaison('${numero}')`, 'info');
+            if (window.detailsManager) {
+                window.detailsManager.editCargaison(numero);
+                updateStatus(`✅ Modal édition cargaison ${numero} ouverte`, 'success');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        function testEditColis(code) {
+            updateStatus(`Test: editColis('${code}')`, 'info');
+            if (window.detailsManager) {
+                window.detailsManager.editColis(code);
+                updateStatus(`✅ Modal édition colis ${code} ouverte`, 'success');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        function testDeleteCargaison(numero) {
+            updateStatus(`Test: deleteCargaison('${numero}') - ATTENTION: Suppression réelle!`, 'warning');
+            if (window.detailsManager) {
+                window.detailsManager.deleteCargaison(numero);
+                updateStatus(`⚠️ Confirmation de suppression cargaison ${numero}`, 'warning');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        function testDeleteColis(code) {
+            updateStatus(`Test: deleteColis('${code}') - ATTENTION: Suppression réelle!`, 'warning');
+            if (window.detailsManager) {
+                window.detailsManager.deleteColis(code);
+                updateStatus(`⚠️ Confirmation de suppression colis ${code}`, 'warning');
+            } else {
+                updateStatus('❌ DetailsManager non disponible', 'error');
+            }
+        }
+        
+        // Tests API
+        async function testApiConnection() {
+            updateStatus('Test de connexion API...', 'info');
+            try {
+                const response = await fetch('http://localhost:3002/cargaisons');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus(`✅ API connectée - ${data.length} cargaisons trouvées`, 'success');
+                } else {
+                    updateStatus(`❌ Erreur API: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Erreur connexion: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadAllCargaisons() {
+            updateStatus('Chargement de toutes les cargaisons...', 'info');
+            try {
+                const response = await fetch('http://localhost:3002/cargaisons');
+                if (response.ok) {
+                    const cargaisons = await response.json();
+                    updateStatus(`✅ ${cargaisons.length} cargaisons chargées:`, 'success');
+                    cargaisons.forEach((c, i) => {
+                        updateStatus(`  ${i+1}. ${c.numero} (${c.type}) - ${c.etat}`, 'info');
+                    });
+                } else {
+                    updateStatus(`❌ Erreur lors du chargement`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadAllColis() {
+            updateStatus('Chargement de tous les colis...', 'info');
+            try {
+                const response = await fetch('http://localhost:3002/colis');
+                if (response.ok) {
+                    const colis = await response.json();
+                    updateStatus(`✅ ${colis.length} colis chargés:`, 'success');
+                    colis.forEach((c, i) => {
+                        updateStatus(`  ${i+1}. ${c.code} - ${c.libelle} (${c.etat})`, 'info');
+                    });
+                } else {
+                    updateStatus(`❌ Erreur lors du chargement`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        // Vérification de l'état au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('🚀 Page de test chargée', 'success');
+            
+            setTimeout(() => {
+                if (window.detailsManager) {
+                    updateStatus('✅ DetailsManager initialisé avec succès', 'success');
+                    testApiConnection();
+                } else {
+                    updateStatus('❌ DetailsManager non disponible au chargement', 'error');
+                    updateStatus('ℹ️ Assurez-vous que dist/main.js est compilé et que l\'API fonctionne', 'info');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
