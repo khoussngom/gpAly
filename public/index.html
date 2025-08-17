@@ -730,6 +730,163 @@
                         case 'incassable': return '🔒 Incassable';
                         default: return type;
                     }
+                },
+
+                async getCargaisonById(id) {
+                    try {
+                        const response = await fetch(`${this.apiUrl}/cargaisons?numero=${id}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération de la cargaison');
+                        }
+                        const cargaisons = await response.json();
+                        return cargaisons.length > 0 ? cargaisons[0] : null;
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        throw error;
+                    }
+                },
+
+                async getColisById(id) {
+                    try {
+                        const response = await fetch(`${this.apiUrl}/colis?code=${id}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération du colis');
+                        }
+                        const colis = await response.json();
+                        return colis.length > 0 ? colis[0] : null;
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        throw error;
+                    }
+                },
+
+                async updateCargaison(id, cargaisonData) {
+                    try {
+                        // Trouver l'ID réel de la cargaison dans db.json
+                        const response = await fetch(`${this.apiUrl}/cargaisons?numero=${id}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération de la cargaison');
+                        }
+                        const cargaisons = await response.json();
+                        if (cargaisons.length === 0) {
+                            throw new Error('Cargaison non trouvée');
+                        }
+                        
+                        const cargaison = cargaisons[0];
+                        const updateResponse = await fetch(`${this.apiUrl}/cargaisons/${cargaison.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(cargaisonData)
+                        });
+                        
+                        if (!updateResponse.ok) {
+                            throw new Error(`Erreur HTTP: ${updateResponse.status}`);
+                        }
+                        
+                        return await updateResponse.json();
+                    } catch (error) {
+                        console.error('Erreur lors de la mise à jour de la cargaison:', error);
+                        throw error;
+                    }
+                },
+
+                async updateColis(id, colisData) {
+                    try {
+                        // Trouver l'ID réel du colis dans db.json
+                        const response = await fetch(`${this.apiUrl}/colis?code=${id}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération du colis');
+                        }
+                        const colis = await response.json();
+                        if (colis.length === 0) {
+                            throw new Error('Colis non trouvé');
+                        }
+                        
+                        const colisObj = colis[0];
+                        const updateResponse = await fetch(`${this.apiUrl}/colis/${colisObj.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(colisData)
+                        });
+                        
+                        if (!updateResponse.ok) {
+                            throw new Error(`Erreur HTTP: ${updateResponse.status}`);
+                        }
+                        
+                        return await updateResponse.json();
+                    } catch (error) {
+                        console.error('Erreur lors de la mise à jour du colis:', error);
+                        throw error;
+                    }
+                },
+
+                async editColis(id) {
+                    try {
+                        const colis = await this.getColisById(id);
+                        if (!colis) {
+                            throw new Error('Colis non trouvé');
+                        }
+                        showEditColisModal(colis);
+                    } catch (error) {
+                        console.error('Erreur lors de l\'édition du colis:', error);
+                        alert('Erreur lors de l\'édition du colis: ' + error.message);
+                    }
+                },
+
+                async editCargaison(id) {
+                    try {
+                        const cargaison = await this.getCargaisonById(id);
+                        if (!cargaison) {
+                            throw new Error('Cargaison non trouvée');
+                        }
+                        showEditCargaisonModal(cargaison);
+                    } catch (error) {
+                        console.error('Erreur lors de l\'édition de la cargaison:', error);
+                        alert('Erreur lors de l\'édition de la cargaison: ' + error.message);
+                    }
+                },
+
+                async closeCargaison(id) {
+                    try {
+                        const cargaison = await this.getCargaisonById(id);
+                        if (!cargaison) {
+                            throw new Error('Cargaison non trouvée');
+                        }
+
+                        const updatedCargaison = {
+                            ...cargaison,
+                            statut: 'fermee',
+                            etat: 'fermee',
+                            dateFermeture: new Date().toISOString()
+                        };
+
+                        await this.updateCargaison(id, updatedCargaison);
+                        
+                        if (typeof loadCargaisons === 'function') {
+                            loadCargaisons();
+                        }
+                        
+                        alert('Cargaison fermée avec succès !');
+                    } catch (error) {
+                        console.error('Erreur lors de la fermeture de la cargaison:', error);
+                        alert('Erreur lors de la fermeture de la cargaison: ' + error.message);
+                    }
+                },
+
+                getProgressPercentage(cargaison) {
+                    const maxColis = 10;
+                    const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+                    return Math.min((currentColis / maxColis) * 100, 100);
+                },
+
+                getProgressColor(percentage) {
+                    if (percentage < 50) return 'bg-green-500';
+                    if (percentage < 80) return 'bg-yellow-500';
+                    return 'bg-red-500';
                 }
             };
         }
@@ -1233,19 +1390,33 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Départ</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Arrivée</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">État</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remplissage</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distance</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            ${cargaisons.map(cargaison => `
+                            ${cargaisons.map(cargaison => {
+                                const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+                                const progressPercentage = Math.min((currentColis / 10) * 100, 100);
+                                const progressColor = progressPercentage < 50 ? 'bg-green-500' : progressPercentage < 80 ? 'bg-yellow-500' : 'bg-red-500';
+                                
+                                return `
                                 <tr class="hover:bg-gray-50 cursor-pointer" onclick="showCargaisonDetail('${cargaison.numero}')">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${cargaison.numero}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cargaison.type}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cargaison.lieuDepart.ville}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cargaison.lieuArrivee.ville}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(cargaison.etat)}">${cargaison.etat}</span>
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(cargaison.etat)}">${getEtatLabel(cargaison.etat)}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                                <div class="${progressColor} h-2 rounded-full transition-all duration-300" style="width: ${progressPercentage}%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-600">${currentColis}/10</span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cargaison.distance} km</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1262,8 +1433,8 @@
                                             <i class="bx bx-trash"></i>
                                         </button>
                                     </td>
-                                </tr>
-                            `).join('')}
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -1561,6 +1732,180 @@
             } else {
                 alert(`Édition du colis ${code} - DetailsManager non disponible`);
             }
+        }
+
+        // Fonction pour afficher la modale d'édition de cargaison
+        function showEditCargaisonModal(cargaison) {
+            const progressPercentage = window.detailsManager.getProgressPercentage(cargaison);
+            const progressColor = window.detailsManager.getProgressColor(progressPercentage);
+            const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+            const isFullyLoaded = currentColis >= 10;
+            const canAddColis = currentColis < 10 && cargaison.etat !== 'fermee';
+
+            const modalHtml = `
+                <div id="edit-cargaison-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+                        <div class="flex justify-between items-start mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Édition Cargaison ${cargaison.numero}</h3>
+                            <button onclick="this.closest('#edit-cargaison-modal').remove()" 
+                                    class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                        </div>
+                        
+                        <!-- Barre de progression -->
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-700">Remplissage de la cargaison</span>
+                                <span class="text-sm text-gray-600">${currentColis}/10 colis</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="${progressColor} h-3 rounded-full transition-all duration-300" 
+                                     style="width: ${progressPercentage}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                ${isFullyLoaded ? '⚠️ Cargaison pleine - Aucun colis supplémentaire ne peut être ajouté' : 
+                                  `${10 - currentColis} colis peuvent encore être ajoutés`}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Informations de base -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-700 mb-3">Informations générales</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                            <select id="edit-cargaison-type" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                                                <option value="maritime" ${cargaison.type === 'maritime' ? 'selected' : ''}>🚢 Maritime</option>
+                                                <option value="aerienne" ${cargaison.type === 'aerienne' ? 'selected' : ''}>✈️ Aérienne</option>
+                                                <option value="routiere" ${cargaison.type === 'routiere' ? 'selected' : ''}>🚛 Routière</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">État</label>
+                                            <select id="edit-cargaison-etat" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                                                <option value="en_preparation" ${cargaison.etat === 'en_preparation' ? 'selected' : ''}>En préparation</option>
+                                                <option value="en_transit" ${cargaison.etat === 'en_transit' ? 'selected' : ''}>En transit</option>
+                                                <option value="livree" ${cargaison.etat === 'livree' ? 'selected' : ''}>Livrée</option>
+                                                <option value="fermee" ${cargaison.etat === 'fermee' ? 'selected' : ''}>Fermée</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Distance (km)</label>
+                                            <input type="number" id="edit-cargaison-distance" value="${cargaison.distance}" 
+                                                   class="w-full border border-gray-300 rounded-md px-3 py-2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gestion des colis -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-700 mb-3">Colis assignés</h4>
+                                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                                        ${cargaison.colis && cargaison.colis.length > 0 ? 
+                                            cargaison.colis.map(code => `
+                                                <div class="flex items-center justify-between p-2 bg-white rounded border">
+                                                    <span class="text-sm font-medium">${code}</span>
+                                                    <button onclick="removeColisFromCargaison('${cargaison.numero}', '${code}')" 
+                                                            class="text-red-600 hover:text-red-800 text-sm">
+                                                        Retirer
+                                                    </button>
+                                                </div>
+                                            `).join('') : 
+                                            '<div class="text-gray-500 italic text-sm">Aucun colis assigné</div>'
+                                        }
+                                    </div>
+                                    
+                                    ${canAddColis ? `
+                                        <div class="mt-3 pt-3 border-t">
+                                            <button onclick="showAddColisModal('${cargaison.numero}')" 
+                                                    class="w-full bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm">
+                                                + Ajouter un colis
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex justify-between items-center mt-6 pt-6 border-t">
+                            <div class="space-x-2">
+                                ${cargaison.etat !== 'fermee' ? `
+                                    <button onclick="closeCargaisonConfirm('${cargaison.numero}')" 
+                                            class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">
+                                        Fermer la cargaison
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <div class="space-x-2">
+                                <button onclick="this.closest('#edit-cargaison-modal').remove()" 
+                                        class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                                    Annuler
+                                </button>
+                                <button onclick="saveCargaisonChanges('${cargaison.numero}')" 
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // Fonction pour afficher la modale d'édition de colis
+        function showEditColisModal(colis) {
+            const modalHtml = `
+                <div id="edit-colis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+                        <div class="flex justify-between items-start mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Édition Colis ${colis.code}</h3>
+                            <button onclick="this.closest('#edit-colis-modal').remove()" 
+                                    class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Destinataire</label>
+                                <input type="text" id="edit-colis-destinataire" value="${colis.destinataire}" 
+                                       class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Adresse de livraison</label>
+                                <textarea id="edit-colis-adresse" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="3">${colis.adresseLivraison}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Poids (kg)</label>
+                                <input type="number" step="0.1" id="edit-colis-poids" value="${colis.poids}" 
+                                       class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Valeur déclarée (€)</label>
+                                <input type="number" step="0.01" id="edit-colis-valeur" value="${colis.valeurDeclaree}" 
+                                       class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-2 mt-6 pt-6 border-t">
+                            <button onclick="this.closest('#edit-colis-modal').remove()" 
+                                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                                Annuler
+                            </button>
+                            <button onclick="saveColisChanges('${colis.code}')" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
         function deleteCargaison(numero) {
@@ -2245,6 +2590,238 @@
                 console.error('Bouton adminButton non trouvé');
             }
         });
+
+        // Fonctions de sauvegarde et gestion des cargaisons
+        async function saveCargaisonChanges(numero) {
+            try {
+                const type = document.getElementById('edit-cargaison-type').value;
+                const etat = document.getElementById('edit-cargaison-etat').value;
+                const distance = parseFloat(document.getElementById('edit-cargaison-distance').value);
+
+                const cargaison = await window.detailsManager.getCargaisonById(numero);
+                if (!cargaison) {
+                    throw new Error('Cargaison non trouvée');
+                }
+
+                const updatedCargaison = {
+                    ...cargaison,
+                    type,
+                    etat,
+                    distance
+                };
+
+                await window.detailsManager.updateCargaison(numero, updatedCargaison);
+                
+                document.getElementById('edit-cargaison-modal').remove();
+                
+                // Rafraîchir l'affichage
+                if (typeof loadCargaisons === 'function') {
+                    loadCargaisons();
+                }
+                
+                alert('Cargaison mise à jour avec succès !');
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde: ' + error.message);
+            }
+        }
+
+        async function saveColisChanges(code) {
+            try {
+                const destinataire = document.getElementById('edit-colis-destinataire').value;
+                const adresse = document.getElementById('edit-colis-adresse').value;
+                const poids = parseFloat(document.getElementById('edit-colis-poids').value);
+                const valeur = parseFloat(document.getElementById('edit-colis-valeur').value);
+
+                const colis = await window.detailsManager.getColisById(code);
+                if (!colis) {
+                    throw new Error('Colis non trouvé');
+                }
+
+                const updatedColis = {
+                    ...colis,
+                    destinataire,
+                    adresseLivraison: adresse,
+                    poids,
+                    valeurDeclaree: valeur
+                };
+
+                await window.detailsManager.updateColis(code, updatedColis);
+                
+                document.getElementById('edit-colis-modal').remove();
+                
+                // Rafraîchir l'affichage
+                if (typeof loadColis === 'function') {
+                    loadColis();
+                }
+                
+                alert('Colis mis à jour avec succès !');
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde: ' + error.message);
+            }
+        }
+
+        function closeCargaisonConfirm(numero) {
+            if (confirm('Êtes-vous sûr de vouloir fermer cette cargaison ? Cette action est irréversible.')) {
+                window.detailsManager.closeCargaison(numero);
+                document.getElementById('edit-cargaison-modal').remove();
+            }
+        }
+
+        async function removeColisFromCargaison(cargaisonNumero, colisCode) {
+            if (!confirm(`Êtes-vous sûr de vouloir retirer le colis ${colisCode} de cette cargaison ?`)) {
+                return;
+            }
+
+            try {
+                // Récupérer la cargaison
+                const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
+                if (!cargaison) {
+                    throw new Error('Cargaison non trouvée');
+                }
+
+                // Retirer le colis de la liste
+                const updatedColis = cargaison.colis.filter(code => code !== colisCode);
+                const updatedCargaison = {
+                    ...cargaison,
+                    colis: updatedColis
+                };
+
+                // Mettre à jour la cargaison
+                await window.detailsManager.updateCargaison(cargaisonNumero, updatedCargaison);
+
+                // Mettre à jour le colis pour retirer l'assignation
+                const colis = await window.detailsManager.getColisById(colisCode);
+                if (colis) {
+                    const updatedColisData = {
+                        ...colis,
+                        cargaisonId: null,
+                        statut: 'en_attente'
+                    };
+                    await window.detailsManager.updateColis(colisCode, updatedColisData);
+                }
+
+                // Fermer et réouvrir la modale pour actualiser
+                document.getElementById('edit-cargaison-modal').remove();
+                const refreshedCargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
+                showEditCargaisonModal(refreshedCargaison);
+
+                alert('Colis retiré avec succès !');
+            } catch (error) {
+                console.error('Erreur lors du retrait:', error);
+                alert('Erreur lors du retrait: ' + error.message);
+            }
+        }
+
+        async function showAddColisModal(cargaisonNumero) {
+            try {
+                // Récupérer les colis disponibles (non assignés)
+                const response = await fetch(`${API_BASE}/colis`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des colis');
+                }
+                
+                const allColis = await response.json();
+                const availableColis = allColis.filter(colis => !colis.cargaisonId || colis.cargaisonId === null);
+
+                if (availableColis.length === 0) {
+                    alert('Aucun colis disponible pour assignation');
+                    return;
+                }
+
+                const modalHtml = `
+                    <div id="add-colis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="text-xl font-bold text-gray-900">Ajouter un colis à la cargaison</h3>
+                                <button onclick="this.closest('#add-colis-modal').remove()" 
+                                        class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                            </div>
+                            
+                            <div class="space-y-3 max-h-60 overflow-y-auto">
+                                ${availableColis.map(colis => `
+                                    <div class="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer" 
+                                         onclick="assignColisToCargoaison('${cargaisonNumero}', '${colis.code}')">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <div class="font-medium">${colis.code}</div>
+                                                <div class="text-sm text-gray-600">${colis.destinataire}</div>
+                                                <div class="text-xs text-gray-500">${colis.poids}kg - ${colis.valeurDeclaree}€</div>
+                                            </div>
+                                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                                Assigner
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="flex justify-end mt-6 pt-6 border-t">
+                                <button onclick="this.closest('#add-colis-modal').remove()" 
+                                        class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement des colis disponibles: ' + error.message);
+            }
+        }
+
+        async function assignColisToCargoaison(cargaisonNumero, colisCode) {
+            try {
+                // Récupérer la cargaison
+                const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
+                if (!cargaison) {
+                    throw new Error('Cargaison non trouvée');
+                }
+
+                // Vérifier si la cargaison peut accepter plus de colis
+                const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+                if (currentColis >= 10) {
+                    alert('Cette cargaison est déjà pleine (10 colis maximum)');
+                    return;
+                }
+
+                // Ajouter le colis à la cargaison
+                const updatedColisArray = [...(cargaison.colis || []), colisCode];
+                const updatedCargaison = {
+                    ...cargaison,
+                    colis: updatedColisArray
+                };
+
+                await window.detailsManager.updateCargaison(cargaisonNumero, updatedCargaison);
+
+                // Mettre à jour le colis
+                const colis = await window.detailsManager.getColisById(colisCode);
+                if (colis) {
+                    const updatedColisData = {
+                        ...colis,
+                        cargaisonId: cargaisonNumero,
+                        statut: 'assigne'
+                    };
+                    await window.detailsManager.updateColis(colisCode, updatedColisData);
+                }
+
+                // Fermer les modales et réouvrir la modale d'édition
+                document.getElementById('add-colis-modal').remove();
+                document.getElementById('edit-cargaison-modal').remove();
+                
+                const refreshedCargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
+                showEditCargaisonModal(refreshedCargaison);
+
+                alert('Colis assigné avec succès !');
+            } catch (error) {
+                console.error('Erreur lors de l\'assignation:', error);
+                alert('Erreur lors de l\'assignation: ' + error.message);
+            }
+        }
     </script>
     </body>
 </html>
