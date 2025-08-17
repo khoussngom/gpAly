@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const appElement = document.getElementById('app');
     if (appElement) {
         const app = new AppManager_1.AppManager();
-        window.appManager = app; // Rendre accessible globalement
+        window.appManager = app;
         app.init();
     }
     else {

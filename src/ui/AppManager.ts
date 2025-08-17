@@ -1,5 +1,4 @@
 import { Cargaison } from '../models/Cargaison';
-import { GestionnaireCargaisons } from '../models/GestionnaireCargaisons';
 import { Maritime } from '../models/Maritime';
 import { Aerienne } from '../models/Aerienne';
 import { Routiere } from '../models/Routiere';
@@ -15,7 +14,7 @@ import { Produit } from '../models/Produit';
 declare const L: any;
 
 export class AppManager {
-    private gestionnaire: GestionnaireCargaisons;
+    private cargaisons: Cargaison[] = [];
     private cargaisonManager: CargaisonManager;
     private currentTab: 'create' | 'manage' = 'create';
     private selectedCargaisonType: 'maritime' | 'aerienne' | 'routiere' | null = null;
@@ -25,11 +24,9 @@ export class AppManager {
     private selectingFor: 'depart' | 'arrivee' | null = null;
     private produitsEnAttente: Colis[] = [];
     private clientsEnregistres: Client[] = [];
-    private distanceLine: any = null; // Pour la ligne de distance sur la carte
+    private distanceLine: any = null;
 
     constructor() {
-        this.gestionnaire = new GestionnaireCargaisons();
-        // On passera le container plus tard dans la méthode init
         this.cargaisonManager = null as any;
     }
 
@@ -37,7 +34,7 @@ export class AppManager {
         this.render();
         this.attachEventListeners();
         
-        // Initialiser le CargaisonManager avec le container approprié
+
         const manageContainer = document.getElementById('manage-view');
         if (manageContainer) {
             this.cargaisonManager = new CargaisonManager(manageContainer);
@@ -94,21 +91,21 @@ export class AppManager {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <button id="btn-maritime" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'maritime' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">🚢</div>
+                                    <div class="text-4xl mb-2">Maritime</div>
                                     <div class="font-semibold text-gray-800">Maritime</div>
                                     <div class="text-sm text-gray-600">Transport par mer</div>
                                 </div>
                             </button>
                             <button id="btn-aerienne" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'aerienne' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">✈️</div>
+                                    <div class="text-4xl mb-2">Aerienne</div>
                                     <div class="font-semibold text-gray-800">Aérienne</div>
                                     <div class="text-sm text-gray-600">Transport aérien</div>
                                 </div>
                             </button>
                             <button id="btn-routiere" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'routiere' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">🚛</div>
+                                    <div class="text-4xl mb-2">Routiére</div>
                                     <div class="font-semibold text-gray-800">Routière</div>
                                     <div class="text-sm text-gray-600">Transport terrestre</div>
                                 </div>
@@ -135,7 +132,7 @@ export class AppManager {
 
                         <!-- Section Client -->
                         <div class="bg-blue-50 p-6 rounded-lg mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">👤 Informations du client</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4"> Informations du client</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="client-prenom" class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
@@ -162,7 +159,7 @@ export class AppManager {
 
                         <!-- Section Produit -->
                         <div class="bg-green-50 p-6 rounded-lg mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📦 Produit initial (obligatoire)</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4"> Produit initial (obligatoire)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                                 <div>
                                     <label for="produit-libelle" class="block text-sm font-medium text-gray-700 mb-2">Libellé du produit *</label>
@@ -176,10 +173,10 @@ export class AppManager {
                                     <label for="produit-type" class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
                                     <select id="produit-type" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                                         <option value="">Sélectionner un type</option>
-                                        <option value="alimentaire">🍎 Alimentaire</option>
-                                        <option value="chimique">⚗️ Chimique</option>
-                                        <option value="materiel-fragile">📱 Matériel fragile</option>
-                                        <option value="materiel-incassable">🔧 Matériel incassable</option>
+                                        <option value="alimentaire"> Alimentaire</option>
+                                        <option value="chimique"> Chimique</option>
+                                        <option value="materiel-fragile"> Matériel fragile</option>
+                                        <option value="materiel-incassable"> Matériel incassable</option>
                                     </select>
                                 </div>
                                 <div id="toxicite-container" class="hidden">
@@ -197,10 +194,10 @@ export class AppManager {
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-2">
                                     <button id="btn-add-produit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                        ➕ Ajouter ce produit
+                                        Ajouter ce produit
                                     </button>
                                     <button id="btn-add-another-produit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 hidden">
-                                        ➕ Ajouter un autre produit
+                                        Ajouter un autre produit
                                     </button>
                                 </div>
                                 <div class="text-sm text-gray-600">
@@ -362,7 +359,6 @@ export class AppManager {
     }
 
     private attachEventListeners(): void {
-        // Tab navigation
         const tabCreate = document.getElementById('tab-create');
         const tabManage = document.getElementById('tab-manage');
 
@@ -373,7 +369,6 @@ export class AppManager {
             tabManage.addEventListener('click', () => this.switchTab('manage'));
         }
 
-        // Cargo type selection
         const btnMaritime = document.getElementById('btn-maritime');
         const btnAerienne = document.getElementById('btn-aerienne');
         const btnRoutiere = document.getElementById('btn-routiere');
@@ -388,7 +383,6 @@ export class AppManager {
             btnRoutiere.addEventListener('click', () => this.selectCargaisonType('routiere'));
         }
 
-        // Coordinate selection
         const btnSelectDepart = document.getElementById('btn-select-depart');
         const btnSelectArrivee = document.getElementById('btn-select-arrivee');
         const btnCloseMap = document.getElementById('btn-close-map');
@@ -403,13 +397,11 @@ export class AppManager {
             btnCloseMap.addEventListener('click', () => this.closeMap());
         }
 
-        // Form submission
         const btnCreateCargaison = document.getElementById('btn-create-cargaison');
         if (btnCreateCargaison) {
             btnCreateCargaison.addEventListener('click', () => this.createCargaison());
         }
 
-        // Product management
         const produitTypeSelect = document.getElementById('produit-type') as HTMLSelectElement;
         if (produitTypeSelect) {
             produitTypeSelect.addEventListener('change', () => this.handleProduitTypeChange());
@@ -438,7 +430,7 @@ export class AppManager {
                     this.cargaisonManager = new CargaisonManager(manageContainer);
                     this.cargaisonManager.init();
                 } else if (manageContainer && this.cargaisonManager) {
-                    // Réinitialiser avec le nouveau container
+
                     this.cargaisonManager = new CargaisonManager(manageContainer);
                     this.cargaisonManager.init();
                 }
@@ -463,7 +455,7 @@ export class AppManager {
             specificFields.innerHTML = this.renderSpecificFields();
         }
 
-        // Update button styles
+
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
             btn.classList.remove('border-blue-500', 'bg-blue-50');
             btn.classList.add('border-gray-200');
@@ -475,7 +467,7 @@ export class AppManager {
             selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
         }
 
-        // Re-attach event listeners for new elements
+
         this.attachEventListeners();
     }
 
@@ -541,24 +533,15 @@ export class AppManager {
                 .openPopup();
         }
 
-        // Calculer et afficher la distance si les deux coordonnées sont définies
+
         this.updateDistanceDisplay();
 
         this.closeMap();
     }
 
-    /**
-     * Calcule la distance entre deux points géographiques en utilisant la formule de Haversine
-     * @param lat1 Latitude du point 1 (en degrés)
-     * @param lng1 Longitude du point 1 (en degrés)
-     * @param lat2 Latitude du point 2 (en degrés)
-     * @param lng2 Longitude du point 2 (en degrés)
-     * @returns Distance en kilomètres
-     */
     private calculateHaversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-        const R = 6371; // Rayon de la Terre en kilomètres
+        const R = 6371;
         
-        // Convertir les degrés en radians
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLng = (lng2 - lng1) * Math.PI / 180;
         
@@ -568,12 +551,10 @@ export class AppManager {
         
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
-        return R * c; // Distance en kilomètres
+        return R * c;
     }
 
-    /**
-     * Met à jour l'affichage de la distance calculée
-     */
+
     private updateDistanceDisplay(): void {
         const distanceDisplay = document.getElementById('distance-display');
         const distanceValue = document.getElementById('distance-value');
@@ -591,7 +572,6 @@ export class AppManager {
             distanceValue.textContent = distance.toFixed(2);
             distanceDisplay.classList.remove('hidden');
 
-            // Ajouter une ligne sur la carte pour visualiser la distance
             this.drawDistanceLine();
         } else {
             distanceDisplay.classList.add('hidden');
@@ -599,16 +579,12 @@ export class AppManager {
         }
     }
 
-    /**
-     * Dessine une ligne sur la carte entre les points de départ et d'arrivée
-     */
+
     private drawDistanceLine(): void {
         if (!this.map || !this.coordinatesDepart || !this.coordinatesArrivee) return;
 
-        // Supprimer la ligne existante s'il y en a une
         this.removeDistanceLine();
 
-        // Créer une nouvelle ligne
         this.distanceLine = L.polyline(
             [
                 [this.coordinatesDepart.lat, this.coordinatesDepart.lng],
@@ -622,7 +598,6 @@ export class AppManager {
             }
         ).addTo(this.map);
 
-        // Ajuster la vue pour montrer les deux points
         const group = new L.featureGroup([
             L.marker([this.coordinatesDepart.lat, this.coordinatesDepart.lng]),
             L.marker([this.coordinatesArrivee.lat, this.coordinatesArrivee.lng])
@@ -630,9 +605,7 @@ export class AppManager {
         this.map.fitBounds(group.getBounds().pad(0.1));
     }
 
-    /**
-     * Supprime la ligne de distance de la carte
-     */
+
     private removeDistanceLine(): void {
         if (this.distanceLine && this.map) {
             this.map.removeLayer(this.distanceLine);
@@ -673,10 +646,8 @@ export class AppManager {
         }
 
         try {
-            // Utiliser le premier produit comme produit initial
             const colisInitial = this.produitsEnAttente[0];
 
-            // Calculer la distance avec la formule de Haversine (plus précise)
             const distance = this.calculateHaversineDistance(
                 this.coordinatesDepart.lat,
                 this.coordinatesDepart.lng,
@@ -684,39 +655,45 @@ export class AppManager {
                 this.coordinatesArrivee.lng
             );
 
-            // Créer les coordonnées selon le format attendu
             const lieuDepart = {
-                ville: "Départ", // À remplacer par la ville sélectionnée
+                ville: "Départ",
                 latitude: this.coordinatesDepart.lat,
                 longitude: this.coordinatesDepart.lng
             };
 
             const lieuArrivee = {
-                ville: "Arrivée", // À remplacer par la ville sélectionnée
+                ville: "Arrivée",
                 latitude: this.coordinatesArrivee.lat,
                 longitude: this.coordinatesArrivee.lng
             };
 
-            // Utiliser le gestionnaire pour créer la cargaison
-            const cargaison = this.gestionnaire.creerCargaison(
-                this.selectedCargaisonType!,
-                colisInitial,
-                distance,
-                lieuDepart,
-                lieuArrivee
-            );
+            let cargaison: Cargaison;
+            switch (this.selectedCargaisonType!) {
+                case 'maritime':
+                    cargaison = new Maritime(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                case 'aerienne':
+                    cargaison = new Aerienne(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                case 'routiere':
+                    cargaison = new Routiere(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                default:
+                    throw new Error('Type de cargaison non supporté');
+            }
 
-            // Ajouter les autres produits s'il y en a
+
+            this.cargaisons.push(cargaison);
+
             for (let i = 1; i < this.produitsEnAttente.length; i++) {
                 try {
-                    cargaison.ajouterProduit(this.produitsEnAttente[i]);
+                    cargaison.ajouterColis(this.produitsEnAttente[i]);
                 } catch (error) {
                     console.warn(`Impossible d'ajouter le produit ${i + 1}:`, error);
-                    // Continuer même si un produit ne peut pas être ajouté
                 }
             }
 
-            // Sauvegarder sur le serveur
+
             this.saveCargaisonToServer(cargaison);
             
             alert(`Cargaison créée avec succès avec ${this.produitsEnAttente.length} produit(s) !`);
@@ -730,7 +707,7 @@ export class AppManager {
 
     private async saveCargaisonToServer(cargaison: Cargaison): Promise<void> {
         try {
-            // Préparer les données des colis
+
             const colisData = this.produitsEnAttente.map(colis => ({
                 id: colis.getCode(),
                 code: colis.getCode(),
@@ -740,7 +717,7 @@ export class AppManager {
                     type: colis.getProduit().constructor.name.toLowerCase(),
                     libelle: colis.getProduit().getLibelle(),
                     poids: colis.getProduit().getPoids(),
-                    // Ajouter toxicité si c'est un produit chimique
+
                     ...(colis.getProduit().constructor.name === 'Chimique' && {
                         toxicite: (colis.getProduit() as any).getNiveauToxicite?.() || 1
                     })
@@ -759,7 +736,7 @@ export class AppManager {
                 cargaisonId: cargaison.getNumero()
             }));
 
-            // Sauvegarder la cargaison
+
             const cargaisonResponse = await fetch('http://localhost:3002/cargaisons', {
                 method: 'POST',
                 headers: {
@@ -794,7 +771,7 @@ export class AppManager {
                 throw new Error('Erreur lors de la sauvegarde de la cargaison');
             }
 
-            // Sauvegarder chaque colis individuellement
+
             for (const colisInfo of colisData) {
                 const colisResponse = await fetch('http://localhost:3002/colis', {
                     method: 'POST',
@@ -847,11 +824,11 @@ export class AppManager {
             }
         });
 
-        // Réinitialiser les listes de produits et clients
+
         this.produitsEnAttente = [];
         this.clientsEnregistres = [];
 
-        // Mettre à jour l'affichage
+
         this.updateProduitsDisplay();
         this.updateCreateButton();
 
@@ -860,7 +837,7 @@ export class AppManager {
         this.selectingFor = null;
         this.selectedCargaisonType = null;
 
-        // Réinitialiser la ligne de distance
+
         this.removeDistanceLine();
 
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
@@ -873,7 +850,6 @@ export class AppManager {
             formContainer.classList.add('hidden');
         }
 
-        // Masquer la section toxicité
         const toxiciteContainer = document.getElementById('toxicite-container');
         if (toxiciteContainer) {
             toxiciteContainer.classList.add('hidden');
@@ -917,20 +893,20 @@ export class AppManager {
 
     private addProduit(): void {
         try {
-            // Récupérer les données du client
+
             const clientPrenom = (document.getElementById('client-prenom') as HTMLInputElement)?.value.trim();
             const clientNom = (document.getElementById('client-nom') as HTMLInputElement)?.value.trim();
             const clientTelephone = (document.getElementById('client-telephone') as HTMLInputElement)?.value.trim();
             const clientEmail = (document.getElementById('client-email') as HTMLInputElement)?.value.trim();
             const clientAdresse = (document.getElementById('client-adresse') as HTMLTextAreaElement)?.value.trim();
 
-            // Récupérer les données du produit
+
             const produitLibelle = (document.getElementById('produit-libelle') as HTMLInputElement)?.value.trim();
             const produitPoids = parseFloat((document.getElementById('produit-poids') as HTMLInputElement)?.value || '0');
             const produitType = (document.getElementById('produit-type') as HTMLSelectElement)?.value;
             const produitToxicite = parseInt((document.getElementById('produit-toxicite') as HTMLSelectElement)?.value || '0');
 
-            // Validation
+
             if (!clientPrenom || !clientNom || !clientTelephone || !clientAdresse) {
                 alert('Veuillez remplir tous les champs obligatoires du client');
                 return;
@@ -946,10 +922,10 @@ export class AppManager {
                 return;
             }
 
-            // Créer le client
+
             const client = new Client(clientNom, clientPrenom, clientTelephone, clientAdresse, clientEmail || undefined);
 
-            // Créer le produit selon son type
+
             let produit: Produit;
             switch (produitType) {
                 case 'alimentaire':
@@ -968,14 +944,13 @@ export class AppManager {
                     throw new Error('Type de produit non reconnu');
             }
 
-            // Créer le colis
+
             const codeUniteForme = `COL-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
             const colis = new Colis(produit, codeUniteForme, client);
 
-            // Ajouter aux listes
             this.produitsEnAttente.push(colis);
             
-            // Ajouter le client s'il n'existe pas déjà
+
             const clientExiste = this.clientsEnregistres.some(c => 
                 c.getNom() === client.getNom() && 
                 c.getPrenom() === client.getPrenom() && 
@@ -985,7 +960,7 @@ export class AppManager {
                 this.clientsEnregistres.push(client);
             }
 
-            // Mettre à jour l'affichage
+
             this.updateProduitsDisplay();
             this.clearProduitForm();
             this.updateCreateButton();
@@ -1008,7 +983,7 @@ export class AppManager {
             produitsCount.textContent = this.produitsEnAttente.length.toString();
         }
 
-        // Afficher/masquer le bouton "Ajouter un autre produit"
+
         if (btnAddAnother) {
             if (this.produitsEnAttente.length > 0) {
                 btnAddAnother.classList.remove('hidden');
@@ -1032,7 +1007,7 @@ export class AppManager {
                         </div>
                         <button onclick="appManager.removeProduit(${index})" 
                                 class="text-red-600 hover:text-red-800 px-2 py-1">
-                            ❌
+                            
                         </button>
                     </div>
                 `).join('');
@@ -1043,7 +1018,7 @@ export class AppManager {
     }
 
     private clearProduitForm(): void {
-        // Vider les champs du produit uniquement, pas du client
+
         const produitLibelle = document.getElementById('produit-libelle') as HTMLInputElement;
         const produitPoids = document.getElementById('produit-poids') as HTMLInputElement;
         const produitType = document.getElementById('produit-type') as HTMLSelectElement;
@@ -1054,7 +1029,7 @@ export class AppManager {
         if (produitType) produitType.value = '';
         if (produitToxicite) produitToxicite.value = '';
 
-        // Masquer la section toxicité
+
         const toxiciteContainer = document.getElementById('toxicite-container');
         if (toxiciteContainer) {
             toxiciteContainer.classList.add('hidden');

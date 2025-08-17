@@ -7,14 +7,18 @@ export class Routiere extends Cargaison {
         this.poidsMax = 1500;
     }
 
-    public calculerFrais(type: 'alimentaire' | 'materiel', poids: number): number {
-        switch(type) {
-            case 'alimentaire':
-                return (poids * 100 * this.distance) + 5000;
-            case 'materiel':
-                return poids * 400 * this.distance;
-            default:
-                throw new Error("Type de produit non reconnu");
-        }
+    public calculerDureeEstimee(): number {
+
+        return Math.ceil(this.distance / 80);
+    }
+
+    public obtenirSpecificites(): string[] {
+        return [
+            "Transport routier flexible",
+            "Capacité moyenne (1500kg max)",
+            "Bon rapport qualité-prix",
+            "Livraison porte-à-porte",
+            "Interdit aux produits chimiques"
+        ];
     }
 }

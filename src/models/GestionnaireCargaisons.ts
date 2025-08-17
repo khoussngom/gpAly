@@ -17,6 +17,8 @@ export class GestionnaireCargaisons {
     private cargaisons: Map<string, Cargaison> = new Map();
     private colis: Map<string, Colis> = new Map();
 
+    @clientRestricted("Les clients ne peuvent pas créer de cargaisons")
+    @auditLog("Création de cargaison")
     public creerCargaison(
         type: 'maritime' | 'aerienne' | 'routiere',
         produitInitial: Colis,
@@ -46,6 +48,8 @@ export class GestionnaireCargaisons {
         return cargaison;
     }
 
+    @requireRole('gestionnaire', "Seuls les gestionnaires peuvent ajouter des colis aux cargaisons")
+    @auditLog("Ajout de colis à une cargaison")
     public ajouterColisACargaison(numeroCargaison: string, colis: Colis): void {
         const cargaison = this.cargaisons.get(numeroCargaison);
         if (!cargaison) {
@@ -132,7 +136,6 @@ export class GestionnaireCargaisons {
             return false;
         }
 
-        // Trouver la cargaison contenant ce colis
         for (const cargaison of this.cargaisons.values()) {
             if (cargaison.recupererColis(codeColis)) {
                 return true;
@@ -141,6 +144,8 @@ export class GestionnaireCargaisons {
         return false;
     }
 
+    @isAdmin("Seuls les administrateurs peuvent marquer un colis comme perdu")
+    @auditLog("Marquage d'un colis comme perdu")
     public marquerColisCommePerdu(codeColis: string): boolean {
         const colis = this.colis.get(codeColis);
         if (!colis) {
@@ -155,6 +160,8 @@ export class GestionnaireCargaisons {
         return false;
     }
 
+    @requirePermission('archive_management', "Permission d'archivage requise")
+    @auditLog("Archivage d'un colis")
     public archiverColis(codeColis: string): boolean {
         const colis = this.colis.get(codeColis);
         if (!colis) {
@@ -185,6 +192,8 @@ export class GestionnaireCargaisons {
         return false;
     }
 
+    @requireRole('gestionnaire', "Seuls les gestionnaires peuvent changer l'état des colis")
+    @auditLog("Modification de l'état d'un colis")
     public changerEtatColis(codeColis: string, nouvelEtat: EtatColis): boolean {
         const colis = this.colis.get(codeColis);
         if (!colis) {
@@ -195,6 +204,8 @@ export class GestionnaireCargaisons {
         return true;
     }
 
+    @isAdmin("Seuls les administrateurs peuvent lancer l'archivage automatique")
+    @auditLog("Archivage automatique des colis")
     public archiverColisAutomatiquement(): void {
         const maintenant = new Date();
         const delaiArchivage = 30 * 24 * 60 * 60 * 1000;
@@ -209,10 +220,12 @@ export class GestionnaireCargaisons {
         }
     }
 
+    @clientRestricted("Les clients ne peuvent pas accéder à toutes les cargaisons")
     public getToutesCargaisons(): Cargaison[] {
         return Array.from(this.cargaisons.values());
     }
 
+    @clientRestricted("Les clients ne peuvent pas accéder à tous les colis")
     public getTousColis(): Colis[] {
         return Array.from(this.colis.values());
     }

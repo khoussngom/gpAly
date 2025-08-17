@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppManager = void 0;
-const GestionnaireCargaisons_1 = require("../models/GestionnaireCargaisons");
 const Maritime_1 = require("../models/Maritime");
 const Aerienne_1 = require("../models/Aerienne");
 const Routiere_1 = require("../models/Routiere");
@@ -23,6 +22,7 @@ const Client_1 = require("../models/Client");
 const Colis_1 = require("../models/Colis");
 class AppManager {
     constructor() {
+        this.cargaisons = [];
         this.currentTab = 'create';
         this.selectedCargaisonType = null;
         this.map = null;
@@ -31,15 +31,12 @@ class AppManager {
         this.selectingFor = null;
         this.produitsEnAttente = [];
         this.clientsEnregistres = [];
-        this.distanceLine = null; // Pour la ligne de distance sur la carte
-        this.gestionnaire = new GestionnaireCargaisons_1.GestionnaireCargaisons();
-        // On passera le container plus tard dans la méthode init
+        this.distanceLine = null;
         this.cargaisonManager = null;
     }
     init() {
         this.render();
         this.attachEventListeners();
-        // Initialiser le CargaisonManager avec le container approprié
         const manageContainer = document.getElementById('manage-view');
         if (manageContainer) {
             this.cargaisonManager = new CargaisonManager_1.CargaisonManager(manageContainer);
@@ -91,21 +88,21 @@ class AppManager {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <button id="btn-maritime" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'maritime' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">🚢</div>
+                                    <div class="text-4xl mb-2">Maritime</div>
                                     <div class="font-semibold text-gray-800">Maritime</div>
                                     <div class="text-sm text-gray-600">Transport par mer</div>
                                 </div>
                             </button>
                             <button id="btn-aerienne" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'aerienne' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">✈️</div>
+                                    <div class="text-4xl mb-2">Aerienne</div>
                                     <div class="font-semibold text-gray-800">Aérienne</div>
                                     <div class="text-sm text-gray-600">Transport aérien</div>
                                 </div>
                             </button>
                             <button id="btn-routiere" class="cargo-type-btn p-6 border-2 rounded-lg transition-all duration-200 hover:shadow-md ${this.selectedCargaisonType === 'routiere' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">🚛</div>
+                                    <div class="text-4xl mb-2">Routiére</div>
                                     <div class="font-semibold text-gray-800">Routière</div>
                                     <div class="text-sm text-gray-600">Transport terrestre</div>
                                 </div>
@@ -131,7 +128,7 @@ class AppManager {
 
                         <!-- Section Client -->
                         <div class="bg-blue-50 p-6 rounded-lg mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">👤 Informations du client</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4"> Informations du client</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="client-prenom" class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
@@ -158,7 +155,7 @@ class AppManager {
 
                         <!-- Section Produit -->
                         <div class="bg-green-50 p-6 rounded-lg mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📦 Produit initial (obligatoire)</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4"> Produit initial (obligatoire)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                                 <div>
                                     <label for="produit-libelle" class="block text-sm font-medium text-gray-700 mb-2">Libellé du produit *</label>
@@ -172,10 +169,10 @@ class AppManager {
                                     <label for="produit-type" class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
                                     <select id="produit-type" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                                         <option value="">Sélectionner un type</option>
-                                        <option value="alimentaire">🍎 Alimentaire</option>
-                                        <option value="chimique">⚗️ Chimique</option>
-                                        <option value="materiel-fragile">📱 Matériel fragile</option>
-                                        <option value="materiel-incassable">🔧 Matériel incassable</option>
+                                        <option value="alimentaire"> Alimentaire</option>
+                                        <option value="chimique"> Chimique</option>
+                                        <option value="materiel-fragile"> Matériel fragile</option>
+                                        <option value="materiel-incassable"> Matériel incassable</option>
                                     </select>
                                 </div>
                                 <div id="toxicite-container" class="hidden">
@@ -193,10 +190,10 @@ class AppManager {
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-2">
                                     <button id="btn-add-produit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                        ➕ Ajouter ce produit
+                                        Ajouter ce produit
                                     </button>
                                     <button id="btn-add-another-produit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 hidden">
-                                        ➕ Ajouter un autre produit
+                                        Ajouter un autre produit
                                     </button>
                                 </div>
                                 <div class="text-sm text-gray-600">
@@ -353,7 +350,6 @@ class AppManager {
         }
     }
     attachEventListeners() {
-        // Tab navigation
         const tabCreate = document.getElementById('tab-create');
         const tabManage = document.getElementById('tab-manage');
         if (tabCreate) {
@@ -362,7 +358,6 @@ class AppManager {
         if (tabManage) {
             tabManage.addEventListener('click', () => this.switchTab('manage'));
         }
-        // Cargo type selection
         const btnMaritime = document.getElementById('btn-maritime');
         const btnAerienne = document.getElementById('btn-aerienne');
         const btnRoutiere = document.getElementById('btn-routiere');
@@ -375,7 +370,6 @@ class AppManager {
         if (btnRoutiere) {
             btnRoutiere.addEventListener('click', () => this.selectCargaisonType('routiere'));
         }
-        // Coordinate selection
         const btnSelectDepart = document.getElementById('btn-select-depart');
         const btnSelectArrivee = document.getElementById('btn-select-arrivee');
         const btnCloseMap = document.getElementById('btn-close-map');
@@ -388,12 +382,10 @@ class AppManager {
         if (btnCloseMap) {
             btnCloseMap.addEventListener('click', () => this.closeMap());
         }
-        // Form submission
         const btnCreateCargaison = document.getElementById('btn-create-cargaison');
         if (btnCreateCargaison) {
             btnCreateCargaison.addEventListener('click', () => this.createCargaison());
         }
-        // Product management
         const produitTypeSelect = document.getElementById('produit-type');
         if (produitTypeSelect) {
             produitTypeSelect.addEventListener('change', () => this.handleProduitTypeChange());
@@ -419,7 +411,6 @@ class AppManager {
                     this.cargaisonManager.init();
                 }
                 else if (manageContainer && this.cargaisonManager) {
-                    // Réinitialiser avec le nouveau container
                     this.cargaisonManager = new CargaisonManager_1.CargaisonManager(manageContainer);
                     this.cargaisonManager.init();
                 }
@@ -440,7 +431,6 @@ class AppManager {
         if (specificFields) {
             specificFields.innerHTML = this.renderSpecificFields();
         }
-        // Update button styles
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
             btn.classList.remove('border-blue-500', 'bg-blue-50');
             btn.classList.add('border-gray-200');
@@ -450,7 +440,6 @@ class AppManager {
             selectedBtn.classList.remove('border-gray-200');
             selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
         }
-        // Re-attach event listeners for new elements
         this.attachEventListeners();
     }
     openMapForSelection(type) {
@@ -509,7 +498,6 @@ class AppManager {
                 .bindPopup(`${type === 'depart' ? 'Départ' : 'Arrivée'}: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
                 .openPopup();
         }
-        // Calculer et afficher la distance si les deux coordonnées sont définies
         this.updateDistanceDisplay();
         this.closeMap();
     }
@@ -522,19 +510,15 @@ class AppManager {
      * @returns Distance en kilomètres
      */
     calculateHaversineDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371; // Rayon de la Terre en kilomètres
-        // Convertir les degrés en radians
+        const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLng = (lng2 - lng1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                 Math.sin(dLng / 2) * Math.sin(dLng / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance en kilomètres
+        return R * c;
     }
-    /**
-     * Met à jour l'affichage de la distance calculée
-     */
     updateDistanceDisplay() {
         const distanceDisplay = document.getElementById('distance-display');
         const distanceValue = document.getElementById('distance-value');
@@ -544,7 +528,6 @@ class AppManager {
             const distance = this.calculateHaversineDistance(this.coordinatesDepart.lat, this.coordinatesDepart.lng, this.coordinatesArrivee.lat, this.coordinatesArrivee.lng);
             distanceValue.textContent = distance.toFixed(2);
             distanceDisplay.classList.remove('hidden');
-            // Ajouter une ligne sur la carte pour visualiser la distance
             this.drawDistanceLine();
         }
         else {
@@ -552,15 +535,10 @@ class AppManager {
             this.removeDistanceLine();
         }
     }
-    /**
-     * Dessine une ligne sur la carte entre les points de départ et d'arrivée
-     */
     drawDistanceLine() {
         if (!this.map || !this.coordinatesDepart || !this.coordinatesArrivee)
             return;
-        // Supprimer la ligne existante s'il y en a une
         this.removeDistanceLine();
-        // Créer une nouvelle ligne
         this.distanceLine = L.polyline([
             [this.coordinatesDepart.lat, this.coordinatesDepart.lng],
             [this.coordinatesArrivee.lat, this.coordinatesArrivee.lng]
@@ -570,16 +548,12 @@ class AppManager {
             opacity: 0.7,
             dashArray: '10, 10'
         }).addTo(this.map);
-        // Ajuster la vue pour montrer les deux points
         const group = new L.featureGroup([
             L.marker([this.coordinatesDepart.lat, this.coordinatesDepart.lng]),
             L.marker([this.coordinatesArrivee.lat, this.coordinatesArrivee.lng])
         ]);
         this.map.fitBounds(group.getBounds().pad(0.1));
     }
-    /**
-     * Supprime la ligne de distance de la carte
-     */
     removeDistanceLine() {
         if (this.distanceLine && this.map) {
             this.map.removeLayer(this.distanceLine);
@@ -612,34 +586,43 @@ class AppManager {
             return;
         }
         try {
-            // Utiliser le premier produit comme produit initial
             const colisInitial = this.produitsEnAttente[0];
-            // Calculer la distance avec la formule de Haversine (plus précise)
             const distance = this.calculateHaversineDistance(this.coordinatesDepart.lat, this.coordinatesDepart.lng, this.coordinatesArrivee.lat, this.coordinatesArrivee.lng);
-            // Créer les coordonnées selon le format attendu
             const lieuDepart = {
-                ville: "Départ", // À remplacer par la ville sélectionnée
+                ville: "Départ",
                 latitude: this.coordinatesDepart.lat,
                 longitude: this.coordinatesDepart.lng
             };
             const lieuArrivee = {
-                ville: "Arrivée", // À remplacer par la ville sélectionnée
+                ville: "Arrivée",
                 latitude: this.coordinatesArrivee.lat,
                 longitude: this.coordinatesArrivee.lng
             };
-            // Utiliser le gestionnaire pour créer la cargaison
-            const cargaison = this.gestionnaire.creerCargaison(this.selectedCargaisonType, colisInitial, distance, lieuDepart, lieuArrivee);
-            // Ajouter les autres produits s'il y en a
+            // Créer la cargaison directement selon le type
+            let cargaison;
+            switch (this.selectedCargaisonType) {
+                case 'maritime':
+                    cargaison = new Maritime_1.Maritime(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                case 'aerienne':
+                    cargaison = new Aerienne_1.Aerienne(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                case 'routiere':
+                    cargaison = new Routiere_1.Routiere(colisInitial, distance, lieuDepart, lieuArrivee);
+                    break;
+                default:
+                    throw new Error('Type de cargaison non supporté');
+            }
+            // Ajouter à la liste des cargaisons
+            this.cargaisons.push(cargaison);
             for (let i = 1; i < this.produitsEnAttente.length; i++) {
                 try {
-                    cargaison.ajouterProduit(this.produitsEnAttente[i]);
+                    cargaison.ajouterColis(this.produitsEnAttente[i]);
                 }
                 catch (error) {
                     console.warn(`Impossible d'ajouter le produit ${i + 1}:`, error);
-                    // Continuer même si un produit ne peut pas être ajouté
                 }
             }
-            // Sauvegarder sur le serveur
             this.saveCargaisonToServer(cargaison);
             alert(`Cargaison créée avec succès avec ${this.produitsEnAttente.length} produit(s) !`);
             this.resetForm();
@@ -652,7 +635,6 @@ class AppManager {
     saveCargaisonToServer(cargaison) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Préparer les données des colis
                 const colisData = this.produitsEnAttente.map(colis => {
                     var _a, _b;
                     return ({
@@ -677,7 +659,6 @@ class AppManager {
                         cargaisonId: cargaison.getNumero()
                     });
                 });
-                // Sauvegarder la cargaison
                 const cargaisonResponse = yield fetch('http://localhost:3002/cargaisons', {
                     method: 'POST',
                     headers: {
@@ -710,7 +691,6 @@ class AppManager {
                 if (!cargaisonResponse.ok) {
                     throw new Error('Erreur lors de la sauvegarde de la cargaison');
                 }
-                // Sauvegarder chaque colis individuellement
                 for (const colisInfo of colisData) {
                     const colisResponse = yield fetch('http://localhost:3002/colis', {
                         method: 'POST',
@@ -765,17 +745,14 @@ class AppManager {
                 input.value = '';
             }
         });
-        // Réinitialiser les listes de produits et clients
         this.produitsEnAttente = [];
         this.clientsEnregistres = [];
-        // Mettre à jour l'affichage
         this.updateProduitsDisplay();
         this.updateCreateButton();
         this.coordinatesDepart = null;
         this.coordinatesArrivee = null;
         this.selectingFor = null;
         this.selectedCargaisonType = null;
-        // Réinitialiser la ligne de distance
         this.removeDistanceLine();
         document.querySelectorAll('.cargo-type-btn').forEach(btn => {
             btn.classList.remove('border-blue-500', 'bg-blue-50');
@@ -826,18 +803,15 @@ class AppManager {
     addProduit() {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         try {
-            // Récupérer les données du client
             const clientPrenom = (_a = document.getElementById('client-prenom')) === null || _a === void 0 ? void 0 : _a.value.trim();
             const clientNom = (_b = document.getElementById('client-nom')) === null || _b === void 0 ? void 0 : _b.value.trim();
             const clientTelephone = (_c = document.getElementById('client-telephone')) === null || _c === void 0 ? void 0 : _c.value.trim();
             const clientEmail = (_d = document.getElementById('client-email')) === null || _d === void 0 ? void 0 : _d.value.trim();
             const clientAdresse = (_e = document.getElementById('client-adresse')) === null || _e === void 0 ? void 0 : _e.value.trim();
-            // Récupérer les données du produit
             const produitLibelle = (_f = document.getElementById('produit-libelle')) === null || _f === void 0 ? void 0 : _f.value.trim();
             const produitPoids = parseFloat(((_g = document.getElementById('produit-poids')) === null || _g === void 0 ? void 0 : _g.value) || '0');
             const produitType = (_h = document.getElementById('produit-type')) === null || _h === void 0 ? void 0 : _h.value;
             const produitToxicite = parseInt(((_j = document.getElementById('produit-toxicite')) === null || _j === void 0 ? void 0 : _j.value) || '0');
-            // Validation
             if (!clientPrenom || !clientNom || !clientTelephone || !clientAdresse) {
                 alert('Veuillez remplir tous les champs obligatoires du client');
                 return;
@@ -850,9 +824,7 @@ class AppManager {
                 alert('Veuillez sélectionner le niveau de toxicité pour un produit chimique');
                 return;
             }
-            // Créer le client
             const client = new Client_1.Client(clientNom, clientPrenom, clientTelephone, clientAdresse, clientEmail || undefined);
-            // Créer le produit selon son type
             let produit;
             switch (produitType) {
                 case 'alimentaire':
@@ -870,19 +842,15 @@ class AppManager {
                 default:
                     throw new Error('Type de produit non reconnu');
             }
-            // Créer le colis
             const codeUniteForme = `COL-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
             const colis = new Colis_1.Colis(produit, codeUniteForme, client);
-            // Ajouter aux listes
             this.produitsEnAttente.push(colis);
-            // Ajouter le client s'il n'existe pas déjà
             const clientExiste = this.clientsEnregistres.some(c => c.getNom() === client.getNom() &&
                 c.getPrenom() === client.getPrenom() &&
                 c.getTelephone() === client.getTelephone());
             if (!clientExiste) {
                 this.clientsEnregistres.push(client);
             }
-            // Mettre à jour l'affichage
             this.updateProduitsDisplay();
             this.clearProduitForm();
             this.updateCreateButton();
@@ -901,7 +869,6 @@ class AppManager {
         if (produitsCount) {
             produitsCount.textContent = this.produitsEnAttente.length.toString();
         }
-        // Afficher/masquer le bouton "Ajouter un autre produit"
         if (btnAddAnother) {
             if (this.produitsEnAttente.length > 0) {
                 btnAddAnother.classList.remove('hidden');
@@ -924,7 +891,7 @@ class AppManager {
                         </div>
                         <button onclick="appManager.removeProduit(${index})" 
                                 class="text-red-600 hover:text-red-800 px-2 py-1">
-                            ❌
+                            
                         </button>
                     </div>
                 `).join('');
@@ -935,7 +902,6 @@ class AppManager {
         }
     }
     clearProduitForm() {
-        // Vider les champs du produit uniquement, pas du client
         const produitLibelle = document.getElementById('produit-libelle');
         const produitPoids = document.getElementById('produit-poids');
         const produitType = document.getElementById('produit-type');
@@ -948,7 +914,6 @@ class AppManager {
             produitType.value = '';
         if (produitToxicite)
             produitToxicite.value = '';
-        // Masquer la section toxicité
         const toxiciteContainer = document.getElementById('toxicite-container');
         if (toxiciteContainer) {
             toxiciteContainer.classList.add('hidden');

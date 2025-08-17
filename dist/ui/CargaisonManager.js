@@ -13,7 +13,6 @@ exports.CargaisonManager = void 0;
 class CargaisonManager {
     constructor(container) {
         this.apiUrl = 'http://localhost:3002';
-        // Variables pour les modals
         this.currentCargaisonId = null;
         this.container = container;
     }
@@ -43,7 +42,7 @@ class CargaisonManager {
                 <!-- Liste des cargaisons -->
                 <div class="card">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-gray-900">📦 Gestion des cargaisons</h2>
+                        <h2 class="text-xl font-semibold text-gray-900"> Gestion des cargaisons</h2>
                         <div class="flex gap-2">
                             <select id="filter-etat" class="input-field">
                                 <option value="">Tous les états</option>
@@ -175,19 +174,15 @@ class CargaisonManager {
     }
     attachEventListeners() {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-        // Recherche de colis
         (_a = document.getElementById('btn-search-colis')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => this.searchColis());
         (_b = document.getElementById('search-colis-id')) === null || _b === void 0 ? void 0 : _b.addEventListener('keypress', (e) => {
             if (e.key === 'Enter')
                 this.searchColis();
         });
-        // Filtres et actualisation
         (_c = document.getElementById('filter-etat')) === null || _c === void 0 ? void 0 : _c.addEventListener('change', () => this.loadCargaisons());
         (_d = document.getElementById('btn-refresh')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => this.loadCargaisons());
-        // Modal de dates
         (_e = document.getElementById('cancel-date-modal')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', () => this.closeDateModal());
         (_f = document.getElementById('save-dates')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', () => this.saveDates());
-        // Modal d'ajout de colis
         (_g = document.getElementById('cancel-add-colis')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', () => this.closeAddColisModal());
         (_h = document.getElementById('save-new-colis')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', () => this.saveNewColis());
         (_j = document.getElementById('modal-product-type')) === null || _j === void 0 ? void 0 : _j.addEventListener('change', () => this.toggleModalToxicityField());
@@ -209,7 +204,7 @@ class CargaisonManager {
                 if (colis.length === 0) {
                     resultContainer.innerHTML = `
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <p class="text-red-700">❌ Aucun colis trouvé avec l'ID: ${colisId}</p>
+                        <p class="text-red-700"> Aucun colis trouvé avec l'ID: ${colisId}</p>
                     </div>
                 `;
                 }
@@ -219,7 +214,7 @@ class CargaisonManager {
                     const cargaison = yield cargaisonResponse.json();
                     resultContainer.innerHTML = `
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-green-800 mb-2">✅ Colis trouvé!</h4>
+                        <h4 class="font-semibold text-green-800 mb-2"> Colis trouvé!</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p><strong>Code:</strong> ${colisInfo.code}</p>
@@ -245,7 +240,7 @@ class CargaisonManager {
                 console.error('Erreur lors de la recherche:', error);
                 resultContainer.innerHTML = `
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p class="text-red-700">❌ Erreur lors de la recherche</p>
+                    <p class="text-red-700"> Erreur lors de la recherche</p>
                 </div>
             `;
                 resultContainer.classList.remove('hidden');
@@ -275,7 +270,6 @@ class CargaisonManager {
                     return;
                 }
                 container.innerHTML = cargaisons.map(cargaison => this.renderCargaisonCard(cargaison)).join('');
-                // Attacher les event listeners pour les boutons d'action
                 this.attachCargaisonEventListeners();
             }
             catch (error) {
@@ -326,20 +320,20 @@ class CargaisonManager {
                     <div class="flex gap-2">
                         ${isActive ? `
                             <button class="btn-add-colis bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                ➕ Ajouter colis
+                                    Ajouter colis
                             </button>
                         ` : ''}
                         <button class="btn-manage-dates bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                            📅 Dates
+                                Dates
                         </button>
                         ${cargaison.etat === 'ouverte' ? `
                             <button class="btn-start-transit bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                🚚 Démarrer
+                                    Démarrer
                             </button>
                         ` : ''}
                         ${cargaison.etat === 'en_transit' ? `
                             <button class="btn-mark-arrived bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                ✅ Arrivée
+                                Arrivée
                             </button>
                         ` : ''}
                     </div>
@@ -348,7 +342,6 @@ class CargaisonManager {
         `;
     }
     attachCargaisonEventListeners() {
-        // Boutons de gestion des dates
         document.querySelectorAll('.btn-manage-dates').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = e.target.getAttribute('data-id');
@@ -356,7 +349,6 @@ class CargaisonManager {
                     this.openDateModal(cargaisonId);
             });
         });
-        // Boutons d'ajout de colis
         document.querySelectorAll('.btn-add-colis').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = e.target.getAttribute('data-id');
@@ -364,7 +356,6 @@ class CargaisonManager {
                     this.openAddColisModal(cargaisonId);
             });
         });
-        // Boutons de démarrage du transit
         document.querySelectorAll('.btn-start-transit').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = e.target.getAttribute('data-id');
@@ -372,7 +363,6 @@ class CargaisonManager {
                     this.startTransit(cargaisonId);
             });
         });
-        // Boutons de marquage d'arrivée
         document.querySelectorAll('.btn-mark-arrived').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = e.target.getAttribute('data-id');
@@ -383,21 +373,21 @@ class CargaisonManager {
     }
     getStatusBadge(etat) {
         const badges = {
-            'ouverte': '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">🔓 Ouverte</span>',
-            'fermee': '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">🔒 Fermée</span>',
-            'en_transit': '<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">🚚 En transit</span>',
-            'arrivee': '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">✅ Arrivée</span>',
-            'annulee': '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">❌ Annulée</span>'
+            'ouverte': '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"> Ouverte</span>',
+            'fermee': '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"> Fermée</span>',
+            'en_transit': '<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium"> En transit</span>',
+            'arrivee': '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium"> Arrivée</span>',
+            'annulee': '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium"> Annulée</span>'
         };
         return badges[etat] || badges['ouverte'];
     }
     getTransportIcon(type) {
         const icons = {
-            'maritime': '🚢',
-            'aerienne': '✈️',
-            'routiere': '🚛'
+            'maritime': 'Maritime',
+            'aerienne': 'Aerienne',
+            'routiere': 'Routiére'
         };
-        return icons[type] || '📦';
+        return icons[type] || 'Colis';
     }
     getEtatLabel(etat) {
         const labels = {
@@ -432,7 +422,6 @@ class CargaisonManager {
                 if (arriveeInput && cargaison.dateArrivee) {
                     arriveeInput.value = new Date(cargaison.dateArrivee).toISOString().slice(0, 16);
                 }
-                // Afficher le champ d'arrivée réelle si en transit ou arrivée
                 if (arriveeContainer && ['en_transit', 'arrivee'].includes(cargaison.etat)) {
                     arriveeContainer.classList.remove('hidden');
                 }
@@ -544,7 +533,6 @@ class CargaisonManager {
                     dateArrivee: null,
                     cargaisonId: this.currentCargaisonId
                 };
-                // Ajouter le colis
                 const colisResponse = yield fetch(`${this.apiUrl}/colis`, {
                     method: 'POST',
                     headers: {
@@ -615,7 +603,6 @@ class CargaisonManager {
                     body: JSON.stringify(updateData),
                 });
                 if (response.ok) {
-                    // Mettre à jour tous les colis de la cargaison
                     const cargaisonResponse = yield fetch(`${this.apiUrl}/cargaisons/${cargaisonId}`);
                     const cargaison = yield cargaisonResponse.json();
                     for (const colisCode of cargaison.colis) {
@@ -665,7 +652,6 @@ class CargaisonManager {
                     body: JSON.stringify(updateData),
                 });
                 if (response.ok) {
-                    // Mettre à jour tous les colis de la cargaison
                     const cargaisonResponse = yield fetch(`${this.apiUrl}/cargaisons/${cargaisonId}`);
                     const cargaison = yield cargaisonResponse.json();
                     for (const colisCode of cargaison.colis) {

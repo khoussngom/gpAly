@@ -7,15 +7,17 @@ class Aerienne extends Cargaison_1.Cargaison {
         super(produitInitial, distance, lieuDepart, lieuArrivee);
         this.poidsMax = 500;
     }
-    calculerFrais(type, poids) {
-        switch (type) {
-            case 'alimentaire':
-                return (poids * 300 * this.distance) + 5000;
-            case 'materiel':
-                return poids * 1000 * this.distance;
-            default:
-                throw new Error("Type de produit non reconnu");
-        }
+    calculerDureeEstimee() {
+        // Transport aérien : 800 km/h en moyenne
+        return Math.ceil(this.distance / 800);
+    }
+    obtenirSpecificites() {
+        return [
+            "Transport aérien rapide",
+            "Capacité réduite (500kg max)",
+            "Coût élevé mais livraison express",
+            "Interdit aux produits chimiques"
+        ];
     }
 }
 exports.Aerienne = Aerienne;

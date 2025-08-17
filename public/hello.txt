@@ -1,0 +1,4 @@
+Hello World! Le serveur Python fonctionne correctement.
+Test timestamp: 2025-08-17 12:36
+
+Si vous voyez ce message, le serveur HTTP Python sert bien les fichiers statiques.

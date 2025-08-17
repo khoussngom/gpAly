@@ -7,18 +7,36 @@ export enum EtatCargaison {
     TERMINE = "TERMINE"
 }
 
+export enum TypeCargaison {
+    ROUTIERE = "routiere",
+    MARITIME = "maritime",
+    AERIENNE = "aerienne"
+}
+
 export interface Coordonnee {
     latitude: number;
     longitude: number;
     ville: string;
 }
 
+export interface FraisTransport {
+    alimentaire: { routiere: number; maritime: number; aerienne: number; autresFrais: number };
+    chimique: { routiere: number; maritime: number; aerienne: number; autresFrais: number };
+    materiel: { routiere: number; maritime: number; aerienne: number; autresFrais: number };
+}
+
+export const FRAIS_TRANSPORT: FraisTransport = {
+    alimentaire: { routiere: 100, maritime: 90, aerienne: 300, autresFrais: 5000 },
+    chimique: { routiere: 0, maritime: 500, aerienne: 0, autresFrais: 10000 },
+    materiel: { routiere: 200, maritime: 400, aerienne: 1000, autresFrais: 0 }
+};
+
 export abstract class Cargaison {
     protected numero: string;
     protected produits: Colis[] = [];
     protected distance: number;
     protected estFermee: boolean = false;
-    protected poidsMax: number = 1000; 
+    protected poidsMax: number = 1000;
     protected lieuDepart: Coordonnee;
     protected lieuArrivee: Coordonnee;
     protected etatAvancement: EtatCargaison = EtatCargaison.EN_ATTENTE;
@@ -36,36 +54,91 @@ export abstract class Cargaison {
     }
 
     private generateNumero(): string {
-        const timestamp = Date.now();
-        const random = Math.floor(Math.random() * 1000);
-        return `CARG-${timestamp}-${random}`;
+        return 'CARG-' + Date.now().toString();
     }
 
-    public ajouterProduit(produit: Colis): void {
+    public ajouterColis(colis: Colis): boolean {
         if (this.estFermee) {
-            throw new Error("Cargaison fermée. Impossible d'ajouter un produit.");
+            console.warn('Cannot add colis to closed cargaison');
+            return false;
         }
 
-        if (this.produits.length >= 10) {
-            throw new Error("La cargaison est pleine (max 10 produits)");
+        const poidsTotal = this.produits.reduce((total, c) => total + c.getPoids(), 0);
+        const nouveauPoids = poidsTotal + colis.getPoids();
+
+        if (nouveauPoids > this.poidsMax) {
+            console.warn(`Capacité dépassée. Poids actuel: ${poidsTotal}kg, tentative d'ajout: ${colis.getPoids()}kg, capacité max: ${this.poidsMax}kg`);
+            return false;
         }
 
-        const poidsTotal = this.getPoidsTotal() + produit.getPoids();
-        if (poidsTotal > this.poidsMax) {
-            throw new Error(`Poids maximum dépassé. Poids actuel: ${this.getPoidsTotal()}kg, Ajout: ${produit.getPoids()}kg, Max: ${this.poidsMax}kg`);
+        const produitToCheck = colis.getProduit();
+        if (!this.verifierCompatibiliteProduit(produitToCheck)) {
+            const typeProduit = produitToCheck.constructor.name.toLowerCase();
+            console.warn(`Produit ${typeProduit} incompatible avec le transport ${this.type}`);
+            return false;
         }
 
-        this.produits.push(produit);
+        this.produits.push(colis);
+        
+        const produit = colis.getProduit();
+        const typeProduit = produit.constructor.name.toLowerCase();
+        const frais = this.calculerFrais(typeProduit, produit.getPoids());
+        
+        console.log(`Produit ajouté : ${produit.getLibelle()} - ${produit.getPoids()}kg - Frais: ${frais} FCFA`);
+        console.log(`Total frais pour ce colis : ${frais} FCFA`);
+        console.log(`Poids total cargaison : ${nouveauPoids}kg / ${this.poidsMax}kg`);
+        
+        return true;
+    }
 
-        const typeProduit = produit.getProduit().constructor.name.toLowerCase();
+    private verifierCompatibiliteProduit(produit: any): boolean {
+        const typeProduit = produit.constructor.name.toLowerCase();
+        const typeTransport = this.type;
+
+        if (typeProduit === 'chimique' && typeTransport !== 'maritime') {
+            return false;
+        }
+        
+        if (typeProduit === 'fragile' && typeTransport === 'maritime') {
+            return false;
+        }
+
+        return true;
+    }
+
+    private getTypeCargaison(): TypeCargaison {
+        const type = this.constructor.name.toLowerCase();
+        switch(type) {
+            case 'maritime': return TypeCargaison.MARITIME;
+            case 'aerienne': return TypeCargaison.AERIENNE;
+            case 'routiere': return TypeCargaison.ROUTIERE;
+            default: return TypeCargaison.ROUTIERE;
+        }
+    }
+
+    private calculerFrais(typeProduit: string, poids: number): number {
+        const typeTransport = this.getTypeCargaison();
+        
         let typeForCalculation = typeProduit;
         if (typeProduit === 'fragile' || typeProduit === 'incassable') {
             typeForCalculation = 'materiel';
         }
+        const fraisType = FRAIS_TRANSPORT[typeForCalculation as keyof FraisTransport];
+        if (!fraisType) return 0;
+        
+        const fraisParKg = fraisType[typeTransport as keyof typeof fraisType] || 0;
+        return fraisParKg * poids;
+    }
 
-        const frais = this.calculerFrais(typeForCalculation, produit.getPoids());
-        console.log(`Produit ajouté : ${produit.getLibelle()} - ${produit.getPoids()}kg`);
-        console.log(`Frais pour ce produit : ${frais} FCFA`);
+    public calculerMontantTotal(): number {
+        let montantTotal = 0;
+        for (const colis of this.produits) {
+            const produit = colis.getProduit();
+            const typeProduit = produit.constructor.name.toLowerCase();
+            const frais = this.calculerFrais(typeProduit, produit.getPoids());
+            montantTotal += frais;
+        }
+        return montantTotal;
     }
 
     public fermerCargaison(): void {
@@ -73,93 +146,43 @@ export abstract class Cargaison {
         this.etatAvancement = EtatCargaison.EN_COURS;
         this.dateDepart = new Date();
         
-        this.produits.forEach(colis => {
-            if (colis.getEtat() === EtatColis.EN_ATTENTE) {
-                colis.setEtat(EtatColis.EN_COURS);
-            }
-        });
+        const montantTotal = this.calculerMontantTotal();
+        console.log(`Cargaison ${this.numero} fermée. Montant total: ${montantTotal} FCFA`);
     }
 
-    public rouvrirCargaison(): void {
-        if (this.etatAvancement !== EtatCargaison.EN_ATTENTE) {
-            throw new Error("Une cargaison ne peut être rouverte que si son état d'avancement est EN ATTENTE");
-        }
-        this.estFermee = false;
-    }
-
-    public marquerArrivee(): void {
-        this.etatAvancement = EtatCargaison.ARRIVE;
-        this.dateArrivee = new Date();
+    public obtenirRecapitulatif(): any {
+        const poidsTotal = this.produits.reduce((total, c) => total + c.getPoids(), 0);
+        const montantTotal = this.calculerMontantTotal();
         
-        this.produits.forEach(colis => {
-            if (colis.getEtat() === EtatColis.EN_COURS) {
-                colis.setEtat(EtatColis.ARRIVE);
-            }
-        });
-    }
-
-    public getPoidsTotal(): number {
-        return this.produits.reduce((total, colis) => total + colis.getPoids(), 0);
+        return {
+            numero: this.numero,
+            type: this.type,
+            poidsTotal: poidsTotal,
+            poidsMax: this.poidsMax,
+            nombreColis: this.produits.length,
+            montantTotal: montantTotal,
+            distance: this.distance,
+            lieuDepart: this.lieuDepart.ville,
+            lieuArrivee: this.lieuArrivee.ville,
+            estFermee: this.estFermee,
+            etat: this.etatAvancement
+        };
     }
 
     public getNumero(): string { return this.numero; }
+    public getProduits(): Colis[] { return this.produits; }
     public getDistance(): number { return this.distance; }
+    public getEstFermee(): boolean { return this.estFermee; }
     public getPoidsMax(): number { return this.poidsMax; }
     public getLieuDepart(): Coordonnee { return this.lieuDepart; }
     public getLieuArrivee(): Coordonnee { return this.lieuArrivee; }
     public getEtatAvancement(): EtatCargaison { return this.etatAvancement; }
     public getDateDepart(): Date | undefined { return this.dateDepart; }
     public getDateArrivee(): Date | undefined { return this.dateArrivee; }
-    public getType(): string { return this.type; }
-    public estOuverte(): boolean { return !this.estFermee; }
-    public nbProduit(): number { return this.produits.length; }
-    public getProduits(): Colis[] { return this.produits; }
 
-    public rechercherColis(code: string): Colis | null {
-        return this.produits.find(colis => colis.getCode() === code) || null;
-    }
+    public setEtatAvancement(etat: EtatCargaison): void { this.etatAvancement = etat; }
+    public setDateArrivee(date: Date): void { this.dateArrivee = date; }
 
-    public marquerColisCommePerdu(code: string): boolean {
-        const colis = this.rechercherColis(code);
-        if (colis) {
-            colis.setEtat(EtatColis.PERDU);
-            return true;
-        }
-        return false;
-    }
-
-    public recupererColis(code: string): boolean {
-        const colis = this.rechercherColis(code);
-        if (colis && colis.getEtat() === EtatColis.ARRIVE) {
-            colis.setEtat(EtatColis.RECUPERE);
-            return true;
-        }
-        return false;
-    }
-
-    public archiverColis(code: string): boolean {
-        const colis = this.rechercherColis(code);
-        if (colis) {
-            colis.setEtat(EtatColis.ARCHIVE);
-            return true;
-        }
-        return false;
-    }
-
-    public abstract calculerFrais(type: string, poids: number): number;
-
-    public sommeTotale(): number {
-        let total = 0;
-        for (let produit of this.getProduits()) {
-            const typeProduit = produit.getProduit().constructor.name.toLowerCase();
-
-            let typeForCalculation = typeProduit;
-            if (typeProduit === 'fragile' || typeProduit === 'incassable') {
-                typeForCalculation = 'materiel';
-            }
-
-            total += this.calculerFrais(typeForCalculation as any, produit.getPoids());
-        }
-        return total < 10000 ? 10000 : total;
-    }
+    public abstract calculerDureeEstimee(): number;
+    public abstract obtenirSpecificites(): string[];
 }

@@ -7,14 +7,17 @@ export class Aerienne extends Cargaison {
         this.poidsMax = 500;
     }
 
-    public calculerFrais(type: 'alimentaire' | 'materiel', poids: number): number {
-        switch(type) {
-            case 'alimentaire':
-                return (poids * 300 * this.distance) + 5000;
-            case 'materiel':
-                return poids * 1000 * this.distance;
-            default:
-                throw new Error("Type de produit non reconnu");
-        }
+    public calculerDureeEstimee(): number {
+
+        return Math.ceil(this.distance / 800);
+    }
+
+    public obtenirSpecificites(): string[] {
+        return [
+            "Transport aérien rapide",
+            "Capacité réduite (500kg max)",
+            "Coût élevé mais livraison express",
+            "Interdit aux produits chimiques"
+        ];
     }
 }

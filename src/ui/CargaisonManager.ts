@@ -78,7 +78,7 @@ export class CargaisonManager {
                 <!-- Liste des cargaisons -->
                 <div class="card">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-gray-900">📦 Gestion des cargaisons</h2>
+                        <h2 class="text-xl font-semibold text-gray-900"> Gestion des cargaisons</h2>
                         <div class="flex gap-2">
                             <select id="filter-etat" class="input-field">
                                 <option value="">Tous les états</option>
@@ -209,21 +209,21 @@ export class CargaisonManager {
     }
 
     private attachEventListeners(): void {
-        // Recherche de colis
+
         document.getElementById('btn-search-colis')?.addEventListener('click', () => this.searchColis());
         document.getElementById('search-colis-id')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.searchColis();
         });
 
-        // Filtres et actualisation
+
         document.getElementById('filter-etat')?.addEventListener('change', () => this.loadCargaisons());
         document.getElementById('btn-refresh')?.addEventListener('click', () => this.loadCargaisons());
 
-        // Modal de dates
+
         document.getElementById('cancel-date-modal')?.addEventListener('click', () => this.closeDateModal());
         document.getElementById('save-dates')?.addEventListener('click', () => this.saveDates());
 
-        // Modal d'ajout de colis
+
         document.getElementById('cancel-add-colis')?.addEventListener('click', () => this.closeAddColisModal());
         document.getElementById('save-new-colis')?.addEventListener('click', () => this.saveNewColis());
         document.getElementById('modal-product-type')?.addEventListener('change', () => this.toggleModalToxicityField());
@@ -248,7 +248,7 @@ export class CargaisonManager {
             if (colis.length === 0) {
                 resultContainer.innerHTML = `
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <p class="text-red-700">❌ Aucun colis trouvé avec l'ID: ${colisId}</p>
+                        <p class="text-red-700"> Aucun colis trouvé avec l'ID: ${colisId}</p>
                     </div>
                 `;
             } else {
@@ -258,7 +258,7 @@ export class CargaisonManager {
                 
                 resultContainer.innerHTML = `
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-green-800 mb-2">✅ Colis trouvé!</h4>
+                        <h4 class="font-semibold text-green-800 mb-2"> Colis trouvé!</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p><strong>Code:</strong> ${colisInfo.code}</p>
@@ -284,7 +284,7 @@ export class CargaisonManager {
             console.error('Erreur lors de la recherche:', error);
             resultContainer.innerHTML = `
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p class="text-red-700">❌ Erreur lors de la recherche</p>
+                    <p class="text-red-700"> Erreur lors de la recherche</p>
                 </div>
             `;
             resultContainer.classList.remove('hidden');
@@ -316,7 +316,6 @@ export class CargaisonManager {
             
             container.innerHTML = cargaisons.map(cargaison => this.renderCargaisonCard(cargaison)).join('');
             
-            // Attacher les event listeners pour les boutons d'action
             this.attachCargaisonEventListeners();
             
         } catch (error) {
@@ -357,7 +356,7 @@ export class CargaisonManager {
                     <div class="text-sm">
                         <span class="font-medium">Arrivée:</span>
                         <br>${cargaison.dateArrivee ? new Date(cargaison.dateArrivee).toLocaleDateString() : 
-                              cargaison.dateArriveeEstimee ? `Estimée: ${new Date(cargaison.dateArriveeEstimee).toLocaleDateString()}` : 'Non estimée'}
+                            cargaison.dateArriveeEstimee ? `Estimée: ${new Date(cargaison.dateArriveeEstimee).toLocaleDateString()}` : 'Non estimée'}
                     </div>
                 </div>
                 
@@ -368,20 +367,20 @@ export class CargaisonManager {
                     <div class="flex gap-2">
                         ${isActive ? `
                             <button class="btn-add-colis bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                ➕ Ajouter colis
+                                    Ajouter colis
                             </button>
                         ` : ''}
                         <button class="btn-manage-dates bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                            📅 Dates
+                                Dates
                         </button>
                         ${cargaison.etat === 'ouverte' ? `
                             <button class="btn-start-transit bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                🚚 Démarrer
+                                    Démarrer
                             </button>
                         ` : ''}
                         ${cargaison.etat === 'en_transit' ? `
                             <button class="btn-mark-arrived bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm" data-id="${cargaison.id}">
-                                ✅ Arrivée
+                                Arrivée
                             </button>
                         ` : ''}
                     </div>
@@ -391,7 +390,7 @@ export class CargaisonManager {
     }
 
     private attachCargaisonEventListeners(): void {
-        // Boutons de gestion des dates
+
         document.querySelectorAll('.btn-manage-dates').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = (e.target as HTMLElement).getAttribute('data-id');
@@ -399,7 +398,7 @@ export class CargaisonManager {
             });
         });
 
-        // Boutons d'ajout de colis
+
         document.querySelectorAll('.btn-add-colis').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = (e.target as HTMLElement).getAttribute('data-id');
@@ -407,7 +406,7 @@ export class CargaisonManager {
             });
         });
 
-        // Boutons de démarrage du transit
+
         document.querySelectorAll('.btn-start-transit').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = (e.target as HTMLElement).getAttribute('data-id');
@@ -415,7 +414,7 @@ export class CargaisonManager {
             });
         });
 
-        // Boutons de marquage d'arrivée
+
         document.querySelectorAll('.btn-mark-arrived').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const cargaisonId = (e.target as HTMLElement).getAttribute('data-id');
@@ -426,22 +425,22 @@ export class CargaisonManager {
 
     private getStatusBadge(etat: string): string {
         const badges = {
-            'ouverte': '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">🔓 Ouverte</span>',
-            'fermee': '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">🔒 Fermée</span>',
-            'en_transit': '<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">🚚 En transit</span>',
-            'arrivee': '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">✅ Arrivée</span>',
-            'annulee': '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">❌ Annulée</span>'
+            'ouverte': '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium"> Ouverte</span>',
+            'fermee': '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"> Fermée</span>',
+            'en_transit': '<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium"> En transit</span>',
+            'arrivee': '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium"> Arrivée</span>',
+            'annulee': '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium"> Annulée</span>'
         };
         return badges[etat as keyof typeof badges] || badges['ouverte'];
     }
 
     private getTransportIcon(type: string): string {
         const icons = {
-            'maritime': '🚢',
-            'aerienne': '✈️',
-            'routiere': '🚛'
+            'maritime': 'Maritime',
+            'aerienne': 'Aerienne',
+            'routiere': 'Routiére'
         };
-        return icons[type as keyof typeof icons] || '📦';
+        return icons[type as keyof typeof icons] || 'Colis';
     }
 
     private getEtatLabel(etat: string): string {
@@ -455,7 +454,6 @@ export class CargaisonManager {
         return labels[etat as keyof typeof labels] || etat;
     }
 
-    // Variables pour les modals
     private currentCargaisonId: string | null = null;
 
     private async openDateModal(cargaisonId: string): Promise<void> {
@@ -484,7 +482,6 @@ export class CargaisonManager {
                 arriveeInput.value = new Date(cargaison.dateArrivee).toISOString().slice(0, 16);
             }
             
-            // Afficher le champ d'arrivée réelle si en transit ou arrivée
             if (arriveeContainer && ['en_transit', 'arrivee'].includes(cargaison.etat)) {
                 arriveeContainer.classList.remove('hidden');
             } else if (arriveeContainer) {
@@ -615,7 +612,7 @@ export class CargaisonManager {
                 cargaisonId: this.currentCargaisonId
             };
             
-            // Ajouter le colis
+
             const colisResponse = await fetch(`${this.apiUrl}/colis`, {
                 method: 'POST',
                 headers: {
@@ -628,7 +625,6 @@ export class CargaisonManager {
                 throw new Error('Erreur lors de l\'ajout du colis');
             }
             
-            // Mettre à jour la cargaison pour ajouter le colis à la liste
             const cargaisonResponse = await fetch(`${this.apiUrl}/cargaisons/${this.currentCargaisonId}`);
             const cargaison = await cargaisonResponse.json();
             
@@ -693,7 +689,7 @@ export class CargaisonManager {
             });
             
             if (response.ok) {
-                // Mettre à jour tous les colis de la cargaison
+
                 const cargaisonResponse = await fetch(`${this.apiUrl}/cargaisons/${cargaisonId}`);
                 const cargaison = await cargaisonResponse.json();
                 
@@ -744,7 +740,7 @@ export class CargaisonManager {
             });
             
             if (response.ok) {
-                // Mettre à jour tous les colis de la cargaison
+
                 const cargaisonResponse = await fetch(`${this.apiUrl}/cargaisons/${cargaisonId}`);
                 const cargaison = await cargaisonResponse.json();
                 

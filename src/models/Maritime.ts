@@ -7,16 +7,18 @@ export class Maritime extends Cargaison {
         this.poidsMax = 2000;
     }
 
-    public calculerFrais(type: 'alimentaire' | 'chimique' | 'materiel', poids: number): number {
-        switch(type) {
-            case 'alimentaire':
-                return (poids * 90 * this.distance) + 5000 ;
-            case 'chimique':
-                return (poids * 500 * this.distance) + 10000;
-            case 'materiel':
-                return poids * 400 * this.distance;
-            default:
-                throw new Error("Type de produit non reconnu");
-        }
+    public calculerDureeEstimee(): number {
+
+        return Math.ceil(this.distance / 30);
+    }
+
+    public obtenirSpecificites(): string[] {
+        return [
+            "Transport maritime économique",
+            "Grande capacité (2000kg max)",
+            "Obligatoire pour produits chimiques",
+            "Interdit aux produits fragiles",
+            "Durée de transport plus longue"
+        ];
     }
 }

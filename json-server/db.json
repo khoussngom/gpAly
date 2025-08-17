@@ -1,4 +1,42 @@
 {
+    "admins": [{
+            "id": 1,
+            "login": "admin",
+            "password": "admin123",
+            "nom": "Administrateur",
+            "prenom": "Principal",
+            "email": "admin@cargaison.com",
+            "role": "super_admin",
+            "dateCreation": "2024-01-01T00:00:00.000Z",
+            "dernierConnexion": null,
+            "actif": true
+        },
+        {
+            "id": 2,
+            "login": "manager",
+            "password": "manager123",
+            "nom": "Gestionnaire",
+            "prenom": "Cargaisons",
+            "email": "manager@cargaison.com",
+            "role": "manager",
+            "dateCreation": "2024-01-01T00:00:00.000Z",
+            "dernierConnexion": null,
+            "actif": true
+        },
+        {
+            "id": 3,
+            "login": "khouss",
+            "password": "khouss2025",
+            "nom": "Opérateur",
+            "prenom": "Logistique",
+            "email": "operateur@cargaison.com",
+            "role": "operateur",
+            "dateCreation": "2024-01-01T00:00:00.000Z",
+            "dernierConnexion": null,
+            "actif": true
+        }
+    ],
+    "sessions": [],
     "cargaisons": [{
             "id": "CAR-1691234567890-1234",
             "type": "maritime",
@@ -91,6 +129,31 @@
             "etat": "ouverte",
             "colis": [
                 "COL-1754697892136-3226"
+            ],
+            "specificData": {}
+        },
+        {
+            "id": "CARG-1754858793866-772",
+            "type": "maritime",
+            "numero": "CARG-1754858793866-772",
+            "distance": 5413.072802206187,
+            "lieuDepart": {
+                "ville": "Départ",
+                "latitude": 15.961329081596647,
+                "longitude": -15.820312500000002
+            },
+            "lieuArrivee": {
+                "ville": "Arrivée",
+                "latitude": 54.16243396806781,
+                "longitude": 23.203125000000004
+            },
+            "dateCreation": "2025-08-10T20:46:33.867Z",
+            "dateDepart": null,
+            "dateArrivee": null,
+            "dateArriveeEstimee": null,
+            "etat": "ouverte",
+            "colis": [
+                "COL-1754858737075-5117"
             ],
             "specificData": {}
         }
@@ -186,6 +249,29 @@
             "dateExpedition": null,
             "dateArrivee": null,
             "cargaisonId": "CARG-1754697940784-261"
+        },
+        {
+            "id": "COL-1754858737075-5117",
+            "code": "COL-1754858737075-5117",
+            "libelle": "thiep",
+            "poids": 25,
+            "produit": {
+                "type": "alimentaire",
+                "libelle": "thiep",
+                "poids": 25
+            },
+            "client": {
+                "nom": "ngom",
+                "prenom": "khouss",
+                "telephone": "+221774730039",
+                "adresse": "dakar",
+                "email": "khoussn@gmail.com"
+            },
+            "etat": "en_attente",
+            "dateCreation": "2025-08-10T20:46:33.867Z",
+            "dateExpedition": null,
+            "dateArrivee": null,
+            "cargaisonId": "CARG-1754858793866-772"
         }
     ],
     "coordonnees": [{

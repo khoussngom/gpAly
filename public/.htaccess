@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Redirection des appels API vers le routeur PHP
+RewriteRule ^api/(.*)$ api/router.php?route=$1 [QSA,L]
+
+# Redirection vers index.html pour toutes les autres requêtes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.html [QSA,L]
