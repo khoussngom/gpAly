@@ -1,457 +1,463 @@
 {
-    "admins": [{
-            "id": 1,
-            "login": "admin",
-            "password": "admin123",
-            "nom": "Administrateur",
-            "prenom": "Principal",
-            "email": "admin@cargaison.com",
-            "role": "super_admin",
-            "dateCreation": "2024-01-01T00:00:00.000Z",
-            "dernierConnexion": null,
-            "actif": true
-        },
-        {
-            "id": 2,
-            "login": "manager",
-            "password": "manager123",
-            "nom": "Gestionnaire",
-            "prenom": "Cargaisons",
-            "email": "manager@cargaison.com",
-            "role": "manager",
-            "dateCreation": "2024-01-01T00:00:00.000Z",
-            "dernierConnexion": null,
-            "actif": true
-        },
-        {
-            "id": 3,
-            "login": "khouss",
-            "password": "khouss2025",
-            "nom": "Opérateur",
-            "prenom": "Logistique",
-            "email": "operateur@cargaison.com",
-            "role": "operateur",
-            "dateCreation": "2024-01-01T00:00:00.000Z",
-            "dernierConnexion": null,
-            "actif": true
-        }
-    ],
-    "sessions": [],
-    "cargaisons": [{
-            "id": "CAR-1691234567890-1234",
-            "type": "maritime",
-            "numero": "CAR-1691234567890-1234",
-            "distance": 1000,
-            "lieuDepart": {
-                "ville": "Dakar",
-                "latitude": 14.6928,
-                "longitude": -17.4467
-            },
-            "lieuArrivee": {
-                "ville": "Abidjan",
-                "latitude": 5.36,
-                "longitude": -4.0083
-            },
-            "dateCreation": "2024-08-08T10:00:00.000Z",
-            "dateDepart": "2024-08-10T08:00:00.000Z",
-            "dateArrivee": null,
-            "dateArriveeEstimee": "2024-08-15T18:00:00.000Z",
-            "etat": "en_transit",
-            "colis": [
-                "COL-1691234567890-5678"
-            ]
-        },
-        {
-            "id": "CAR-1691234567890-2345",
-            "type": "aerienne",
-            "numero": "CAR-1691234567890-2345",
-            "distance": 2500,
-            "lieuDepart": {
-                "ville": "Casablanca",
-                "latitude": 33.5731,
-                "longitude": -7.5898
-            },
-            "lieuArrivee": {
-                "ville": "Lagos",
-                "latitude": 6.5244,
-                "longitude": 3.3792
-            },
-            "dateCreation": "2024-08-07T14:30:00.000Z",
-            "dateDepart": "2024-08-09T06:00:00.000Z",
-            "dateArrivee": "2024-08-09T12:30:00.000Z",
-            "dateArriveeEstimee": "2024-08-09T12:00:00.000Z",
-            "etat": "arrivee",
-            "colis": [
-                "COL-1691234567890-9876"
-            ]
-        },
-        {
-            "id": "CAR-1691234567890-3456",
-            "type": "routiere",
-            "numero": "CAR-1691234567890-3456",
-            "distance": 800,
-            "lieuDepart": {
-                "ville": "Accra",
-                "latitude": 5.6037,
-                "longitude": -0.187
-            },
-            "lieuArrivee": {
-                "ville": "Abidjan",
-                "latitude": 5.36,
-                "longitude": -4.0083
-            },
-            "dateCreation": "2024-08-08T16:00:00.000Z",
-            "dateDepart": null,
-            "dateArrivee": null,
-            "dateArriveeEstimee": null,
-            "etat": "ouverte",
-            "colis": []
-        },
-        {
-            "id": "CARG-1754697940784-261",
-            "type": "maritime",
-            "numero": "CARG-1754697940784-261",
-            "distance": 11647.40253576782,
-            "lieuDepart": {
-                "ville": "Départ",
-                "latitude": 17.978733095556183,
-                "longitude": -17.226562500000004
-            },
-            "lieuArrivee": {
-                "ville": "Arrivée",
-                "latitude": 64.16810689799155,
-                "longitude": 76.99218750000001
-            },
-            "dateCreation": "2025-08-09T00:05:40.785Z",
-            "dateDepart": null,
-            "dateArrivee": null,
-            "dateArriveeEstimee": null,
-            "etat": "ouverte",
-            "colis": [
-                "COL-1754697892136-3226"
-            ],
-            "specificData": {}
-        },
-        {
-            "id": "CARG-1754858793866-772",
-            "type": "maritime",
-            "numero": "CARG-1754858793866-772",
-            "distance": 5413.072802206187,
-            "lieuDepart": {
-                "ville": "Départ",
-                "latitude": 15.961329081596647,
-                "longitude": -15.820312500000002
-            },
-            "lieuArrivee": {
-                "ville": "Arrivée",
-                "latitude": 54.16243396806781,
-                "longitude": 23.203125000000004
-            },
-            "dateCreation": "2025-08-10T20:46:33.867Z",
-            "dateDepart": null,
-            "dateArrivee": null,
-            "dateArriveeEstimee": null,
-            "etat": "ouverte",
-            "colis": [
-                "COL-1754858737075-5117"
-            ],
-            "specificData": {}
-        },
-        {
-            "numero": "12345",
-            "type": "aerienne",
-            "lieuDepart": "Ville inconnue, Pays inconnu",
-            "lieuArrivee": "Ville inconnue, Pays inconnu",
-            "dateDepart": "2025-08-17T19:35",
-            "dateArrivee": "2025-08-24T19:35",
-            "distance": 518,
-            "etat": "en_preparation",
-            "id": "4io-c0Q",
-            "colis": []
-        }
-    ],
-    "colis": [{
-            "id": "COL-1691234567890-5678",
-            "code": "COL-1691234567890-5678",
-            "libelle": "Riz basmati",
-            "poids": 25,
-            "produit": {
-                "type": "alimentaire",
-                "libelle": "Riz basmati",
-                "poids": 25
-            },
-            "client": {
-                "nom": "Dupont",
-                "prenom": "Jean",
-                "telephone": "+221 77 123 45 67",
-                "adresse": "123 Rue de la Paix, Dakar",
-                "email": "jean.dupont@email.com"
-            },
-            "etat": "en_transit",
-            "dateCreation": "2024-08-08T10:00:00.000Z",
-            "dateExpedition": "2024-08-10T08:00:00.000Z",
-            "dateArrivee": null,
-            "cargaisonId": "CAR-1691234567890-1234"
-        },
-        {
-            "id": "COL-1691234567890-9876",
-            "code": "COL-1691234567890-9876",
-            "libelle": "Ordinateur portable",
-            "poids": 2.5,
-            "produit": {
-                "type": "fragile",
-                "libelle": "Ordinateur portable",
-                "poids": 2.5
-            },
-            "client": {
-                "nom": "Diallo",
-                "prenom": "Aminata",
-                "telephone": "+212 66 987 65 43",
-                "adresse": "45 Avenue Hassan II, Casablanca",
-                "email": "aminata.diallo@email.ma"
-            },
-            "etat": "arrive",
-            "dateCreation": "2024-08-07T14:30:00.000Z",
-            "dateExpedition": "2024-08-09T06:00:00.000Z",
-            "dateArrivee": "2024-08-09T12:30:00.000Z",
-            "cargaisonId": "CAR-1691234567890-2345"
-        },
-        {
-            "id": "COL-1691234567890-1111",
-            "code": "COL-1691234567890-1111",
-            "libelle": "Médicaments",
-            "poids": 5,
-            "produit": {
-                "type": "chimique",
-                "libelle": "Médicaments",
-                "poids": 5,
-                "toxicite": 2
-            },
-            "client": {
-                "nom": "Kone",
-                "prenom": "Ibrahim",
-                "telephone": "+233 24 555 77 88",
-                "adresse": "12 Ring Road, Accra",
-                "email": "ibrahim.kone@email.gh"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2024-08-08T16:00:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": "CAR-1691234567890-3456"
-        },
-        {
-            "id": "COL-1754697892136-3226",
-            "code": "COL-1754697892136-3226",
-            "libelle": "sac",
-            "poids": 2,
-            "produit": {
-                "type": "incassable",
-                "libelle": "sac",
-                "poids": 2
-            },
-            "client": {
-                "nom": "ngom",
-                "prenom": "khouss",
-                "telephone": "774730039",
-                "adresse": "dakar"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-09T00:05:40.785Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": "CARG-1754697940784-261"
-        },
-        {
-            "id": "COL-1754858737075-5117",
-            "code": "COL-1754858737075-5117",
-            "libelle": "thiep",
-            "poids": 25,
-            "produit": {
-                "type": "alimentaire",
-                "libelle": "thiep",
-                "poids": 25
-            },
-            "client": {
-                "nom": "ngom",
-                "prenom": "khouss",
-                "telephone": "+221774730039",
-                "adresse": "dakar",
-                "email": "khoussn@gmail.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-10T20:46:33.867Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": "CARG-1754858793866-772"
-        },
-        {
-            "id": "COL-TEST-001",
-            "code": "COL-TEST-001",
-            "libelle": "Smartphone Samsung",
-            "poids": 1.2,
-            "produit": {
-                "type": "fragile",
-                "libelle": "Smartphone Samsung",
-                "poids": 1.2
-            },
-            "client": {
-                "nom": "Martin",
-                "prenom": "Sophie",
-                "telephone": "+221 77 555 66 77",
-                "adresse": "15 Avenue Bourguiba, Dakar",
-                "email": "sophie.martin@email.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-17T10:00:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": null,
-            "destinataire": "Martin Sophie",
-            "adresseLivraison": "15 Avenue Bourguiba, Dakar",
-            "valeurDeclaree": 800,
-            "statut": "en_attente"
-        },
-        {
-            "id": "COL-TEST-002",
-            "code": "COL-TEST-002",
-            "libelle": "Produits chimiques",
-            "poids": 10.5,
-            "produit": {
-                "type": "chimique",
-                "libelle": "Produits chimiques",
-                "poids": 10.5,
-                "toxicite": 3
-            },
-            "client": {
-                "nom": "Laboratoire",
-                "prenom": "Alpha",
-                "telephone": "+221 33 888 99 00",
-                "adresse": "Zone industrielle, Dakar",
-                "email": "alpha.lab@email.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-17T10:15:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": null,
-            "destinataire": "Laboratoire Alpha",
-            "adresseLivraison": "Zone industrielle, Dakar",
-            "valeurDeclaree": 1500
-        },
-        {
-            "id": "COL-TEST-003",
-            "code": "COL-TEST-003",
-            "libelle": "Légumes frais",
-            "poids": 15,
-            "produit": {
-                "type": "alimentaire",
-                "libelle": "Légumes frais",
-                "poids": 15
-            },
-            "client": {
-                "nom": "Diop",
-                "prenom": "Fatou",
-                "telephone": "+221 70 444 55 66",
-                "adresse": "Marché Kermel, Dakar",
-                "email": "fatou.diop@email.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-17T10:30:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": null,
-            "destinataire": "Diop Fatou",
-            "adresseLivraison": "Marché Kermel, Dakar",
-            "valeurDeclaree": 250
-        },
-        {
-            "id": "COL-TEST-004",
-            "code": "COL-TEST-004",
-            "libelle": "Outils en acier",
-            "poids": 8.5,
-            "produit": {
-                "type": "incassable",
-                "libelle": "Outils en acier",
-                "poids": 8.5
-            },
-            "client": {
-                "nom": "Sow",
-                "prenom": "Mamadou",
-                "telephone": "+221 76 333 44 55",
-                "adresse": "Quartier HLM, Dakar",
-                "email": "mamadou.sow@email.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-17T10:45:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": null,
-            "destinataire": "Sow Mamadou",
-            "adresseLivraison": "Quartier HLM, Dakar",
-            "valeurDeclaree": 600
-        },
-        {
-            "id": "COL-TEST-005",
-            "code": "COL-TEST-005",
-            "libelle": "Équipement médical",
-            "poids": 12,
-            "produit": {
-                "type": "materiel",
-                "libelle": "Équipement médical",
-                "poids": 12
-            },
-            "client": {
-                "nom": "Hôpital",
-                "prenom": "Principal",
-                "telephone": "+221 33 111 22 33",
-                "adresse": "Avenue Cheikh Anta Diop, Dakar",
-                "email": "hopital.principal@email.com"
-            },
-            "etat": "en_attente",
-            "dateCreation": "2025-08-17T11:00:00.000Z",
-            "dateExpedition": null,
-            "dateArrivee": null,
-            "cargaisonId": null,
-            "destinataire": "Hôpital Principal",
-            "adresseLivraison": "Avenue Cheikh Anta Diop, Dakar",
-            "valeurDeclaree": 3000
-        }
-    ],
-    "coordonnees": [{
-            "id": 1,
-            "ville": "Dakar",
-            "pays": "Sénégal",
-            "latitude": 14.6928,
-            "longitude": -17.4467
-        },
-        {
-            "id": 2,
-            "ville": "Abidjan",
-            "pays": "Côte d'Ivoire",
-            "latitude": 5.36,
-            "longitude": -4.0083
-        },
-        {
-            "id": 3,
-            "ville": "Casablanca",
-            "pays": "Maroc",
-            "latitude": 33.5731,
-            "longitude": -7.5898
-        },
-        {
-            "id": 4,
-            "ville": "Lagos",
-            "pays": "Nigeria",
-            "latitude": 6.5244,
-            "longitude": 3.3792
-        },
-        {
-            "id": 5,
-            "ville": "Accra",
-            "pays": "Ghana",
-            "latitude": 5.6037,
-            "longitude": -0.187
-        }
-    ]
+  "admins": [
+    {
+      "id": 1,
+      "login": "admin",
+      "password": "admin123",
+      "nom": "Administrateur",
+      "prenom": "Principal",
+      "email": "admin@cargaison.com",
+      "role": "super_admin",
+      "dateCreation": "2024-01-01T00:00:00.000Z",
+      "dernierConnexion": null,
+      "actif": true
+    },
+    {
+      "id": 2,
+      "login": "manager",
+      "password": "manager123",
+      "nom": "Gestionnaire",
+      "prenom": "Cargaisons",
+      "email": "manager@cargaison.com",
+      "role": "manager",
+      "dateCreation": "2024-01-01T00:00:00.000Z",
+      "dernierConnexion": null,
+      "actif": true
+    },
+    {
+      "id": 3,
+      "login": "khouss",
+      "password": "khouss2025",
+      "nom": "Opérateur",
+      "prenom": "Logistique",
+      "email": "operateur@cargaison.com",
+      "role": "operateur",
+      "dateCreation": "2024-01-01T00:00:00.000Z",
+      "dernierConnexion": null,
+      "actif": true
+    }
+  ],
+  "sessions": [],
+  "cargaisons": [
+    {
+      "id": "CAR-1691234567890-1234",
+      "type": "maritime",
+      "numero": "CAR-1691234567890-1234",
+      "distance": 1000,
+      "lieuDepart": {
+        "ville": "Dakar",
+        "latitude": 14.6928,
+        "longitude": -17.4467
+      },
+      "lieuArrivee": {
+        "ville": "Abidjan",
+        "latitude": 5.36,
+        "longitude": -4.0083
+      },
+      "dateCreation": "2024-08-08T10:00:00.000Z",
+      "dateDepart": "2024-08-10T08:00:00.000Z",
+      "dateArrivee": null,
+      "dateArriveeEstimee": "2024-08-15T18:00:00.000Z",
+      "etat": "en_transit",
+      "colis": [
+        "COL-1691234567890-5678"
+      ]
+    },
+    {
+      "id": "CAR-1691234567890-2345",
+      "type": "aerienne",
+      "numero": "CAR-1691234567890-2345",
+      "distance": 2500,
+      "lieuDepart": {
+        "ville": "Casablanca",
+        "latitude": 33.5731,
+        "longitude": -7.5898
+      },
+      "lieuArrivee": {
+        "ville": "Lagos",
+        "latitude": 6.5244,
+        "longitude": 3.3792
+      },
+      "dateCreation": "2024-08-07T14:30:00.000Z",
+      "dateDepart": "2024-08-09T06:00:00.000Z",
+      "dateArrivee": "2024-08-09T12:30:00.000Z",
+      "dateArriveeEstimee": "2024-08-09T12:00:00.000Z",
+      "etat": "arrivee",
+      "colis": [
+        "COL-1691234567890-9876"
+      ]
+    },
+    {
+      "id": "CAR-1691234567890-3456",
+      "type": "routiere",
+      "numero": "CAR-1691234567890-3456",
+      "distance": 800,
+      "lieuDepart": {
+        "ville": "Accra",
+        "latitude": 5.6037,
+        "longitude": -0.187
+      },
+      "lieuArrivee": {
+        "ville": "Abidjan",
+        "latitude": 5.36,
+        "longitude": -4.0083
+      },
+      "dateCreation": "2024-08-08T16:00:00.000Z",
+      "dateDepart": null,
+      "dateArrivee": null,
+      "dateArriveeEstimee": null,
+      "etat": "ouverte",
+      "colis": []
+    },
+    {
+      "id": "CARG-1754697940784-261",
+      "type": "maritime",
+      "numero": "CARG-1754697940784-261",
+      "distance": 11647.40253576782,
+      "lieuDepart": {
+        "ville": "Départ",
+        "latitude": 17.978733095556183,
+        "longitude": -17.226562500000004
+      },
+      "lieuArrivee": {
+        "ville": "Arrivée",
+        "latitude": 64.16810689799155,
+        "longitude": 76.99218750000001
+      },
+      "dateCreation": "2025-08-09T00:05:40.785Z",
+      "dateDepart": null,
+      "dateArrivee": null,
+      "dateArriveeEstimee": null,
+      "etat": "ouverte",
+      "colis": [
+        "COL-1754697892136-3226"
+      ],
+      "specificData": {}
+    },
+    {
+      "id": "CARG-1754858793866-772",
+      "type": "maritime",
+      "numero": "CARG-1754858793866-772",
+      "distance": 5413.072802206187,
+      "lieuDepart": {
+        "ville": "Départ",
+        "latitude": 15.961329081596647,
+        "longitude": -15.820312500000002
+      },
+      "lieuArrivee": {
+        "ville": "Arrivée",
+        "latitude": 54.16243396806781,
+        "longitude": 23.203125000000004
+      },
+      "dateCreation": "2025-08-10T20:46:33.867Z",
+      "dateDepart": null,
+      "dateArrivee": null,
+      "dateArriveeEstimee": null,
+      "etat": "ouverte",
+      "colis": [
+        "COL-1754858737075-5117"
+      ],
+      "specificData": {}
+    },
+    {
+      "numero": "12345",
+      "type": "aerienne",
+      "lieuDepart": "Ville inconnue, Pays inconnu",
+      "lieuArrivee": "Ville inconnue, Pays inconnu",
+      "dateDepart": "2025-08-17T19:35",
+      "dateArrivee": "2025-08-24T19:35",
+      "distance": 518,
+      "etat": "en_preparation",
+      "id": "4io-c0Q",
+      "colis": [],
+      "statut": "fermee",
+      "dateFermeture": "2025-08-17T19:57:56.653Z"
+    }
+  ],
+  "colis": [
+    {
+      "id": "COL-1691234567890-5678",
+      "code": "COL-1691234567890-5678",
+      "libelle": "Riz basmati",
+      "poids": 25,
+      "produit": {
+        "type": "alimentaire",
+        "libelle": "Riz basmati",
+        "poids": 25
+      },
+      "client": {
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "telephone": "+221 77 123 45 67",
+        "adresse": "123 Rue de la Paix, Dakar",
+        "email": "jean.dupont@email.com"
+      },
+      "etat": "en_transit",
+      "dateCreation": "2024-08-08T10:00:00.000Z",
+      "dateExpedition": "2024-08-10T08:00:00.000Z",
+      "dateArrivee": null,
+      "cargaisonId": "CAR-1691234567890-1234"
+    },
+    {
+      "id": "COL-1691234567890-9876",
+      "code": "COL-1691234567890-9876",
+      "libelle": "Ordinateur portable",
+      "poids": 2.5,
+      "produit": {
+        "type": "fragile",
+        "libelle": "Ordinateur portable",
+        "poids": 2.5
+      },
+      "client": {
+        "nom": "Diallo",
+        "prenom": "Aminata",
+        "telephone": "+212 66 987 65 43",
+        "adresse": "45 Avenue Hassan II, Casablanca",
+        "email": "aminata.diallo@email.ma"
+      },
+      "etat": "arrive",
+      "dateCreation": "2024-08-07T14:30:00.000Z",
+      "dateExpedition": "2024-08-09T06:00:00.000Z",
+      "dateArrivee": "2024-08-09T12:30:00.000Z",
+      "cargaisonId": "CAR-1691234567890-2345"
+    },
+    {
+      "id": "COL-1691234567890-1111",
+      "code": "COL-1691234567890-1111",
+      "libelle": "Médicaments",
+      "poids": 5,
+      "produit": {
+        "type": "chimique",
+        "libelle": "Médicaments",
+        "poids": 5,
+        "toxicite": 2
+      },
+      "client": {
+        "nom": "Kone",
+        "prenom": "Ibrahim",
+        "telephone": "+233 24 555 77 88",
+        "adresse": "12 Ring Road, Accra",
+        "email": "ibrahim.kone@email.gh"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2024-08-08T16:00:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": "CAR-1691234567890-3456"
+    },
+    {
+      "id": "COL-1754697892136-3226",
+      "code": "COL-1754697892136-3226",
+      "libelle": "sac",
+      "poids": 2,
+      "produit": {
+        "type": "incassable",
+        "libelle": "sac",
+        "poids": 2
+      },
+      "client": {
+        "nom": "ngom",
+        "prenom": "khouss",
+        "telephone": "774730039",
+        "adresse": "dakar"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-09T00:05:40.785Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": "CARG-1754697940784-261"
+    },
+    {
+      "id": "COL-1754858737075-5117",
+      "code": "COL-1754858737075-5117",
+      "libelle": "thiep",
+      "poids": 25,
+      "produit": {
+        "type": "alimentaire",
+        "libelle": "thiep",
+        "poids": 25
+      },
+      "client": {
+        "nom": "ngom",
+        "prenom": "khouss",
+        "telephone": "+221774730039",
+        "adresse": "dakar",
+        "email": "khoussn@gmail.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-10T20:46:33.867Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": "CARG-1754858793866-772"
+    },
+    {
+      "id": "COL-TEST-001",
+      "code": "COL-TEST-001",
+      "libelle": "Smartphone Samsung",
+      "poids": 1.2,
+      "produit": {
+        "type": "fragile",
+        "libelle": "Smartphone Samsung",
+        "poids": 1.2
+      },
+      "client": {
+        "nom": "Martin",
+        "prenom": "Sophie",
+        "telephone": "+221 77 555 66 77",
+        "adresse": "15 Avenue Bourguiba, Dakar",
+        "email": "sophie.martin@email.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-17T10:00:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": null,
+      "destinataire": "Martin Sophie",
+      "adresseLivraison": "15 Avenue Bourguiba, Dakar",
+      "valeurDeclaree": 800,
+      "statut": "en_attente"
+    },
+    {
+      "id": "COL-TEST-002",
+      "code": "COL-TEST-002",
+      "libelle": "Produits chimiques",
+      "poids": 10.5,
+      "produit": {
+        "type": "chimique",
+        "libelle": "Produits chimiques",
+        "poids": 10.5,
+        "toxicite": 3
+      },
+      "client": {
+        "nom": "Laboratoire",
+        "prenom": "Alpha",
+        "telephone": "+221 33 888 99 00",
+        "adresse": "Zone industrielle, Dakar",
+        "email": "alpha.lab@email.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-17T10:15:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": null,
+      "destinataire": "Laboratoire Alpha",
+      "adresseLivraison": "Zone industrielle, Dakar",
+      "valeurDeclaree": 1500
+    },
+    {
+      "id": "COL-TEST-003",
+      "code": "COL-TEST-003",
+      "libelle": "Légumes frais",
+      "poids": 15,
+      "produit": {
+        "type": "alimentaire",
+        "libelle": "Légumes frais",
+        "poids": 15
+      },
+      "client": {
+        "nom": "Diop",
+        "prenom": "Fatou",
+        "telephone": "+221 70 444 55 66",
+        "adresse": "Marché Kermel, Dakar",
+        "email": "fatou.diop@email.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-17T10:30:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": null,
+      "destinataire": "Diop Fatou",
+      "adresseLivraison": "Marché Kermel, Dakar",
+      "valeurDeclaree": 250
+    },
+    {
+      "id": "COL-TEST-004",
+      "code": "COL-TEST-004",
+      "libelle": "Outils en acier",
+      "poids": 8.5,
+      "produit": {
+        "type": "incassable",
+        "libelle": "Outils en acier",
+        "poids": 8.5
+      },
+      "client": {
+        "nom": "Sow",
+        "prenom": "Mamadou",
+        "telephone": "+221 76 333 44 55",
+        "adresse": "Quartier HLM, Dakar",
+        "email": "mamadou.sow@email.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-17T10:45:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": null,
+      "destinataire": "Sow Mamadou",
+      "adresseLivraison": "Quartier HLM, Dakar",
+      "valeurDeclaree": 600
+    },
+    {
+      "id": "COL-TEST-005",
+      "code": "COL-TEST-005",
+      "libelle": "Équipement médical",
+      "poids": 12,
+      "produit": {
+        "type": "materiel",
+        "libelle": "Équipement médical",
+        "poids": 12
+      },
+      "client": {
+        "nom": "Hôpital",
+        "prenom": "Principal",
+        "telephone": "+221 33 111 22 33",
+        "adresse": "Avenue Cheikh Anta Diop, Dakar",
+        "email": "hopital.principal@email.com"
+      },
+      "etat": "en_attente",
+      "dateCreation": "2025-08-17T11:00:00.000Z",
+      "dateExpedition": null,
+      "dateArrivee": null,
+      "cargaisonId": null,
+      "destinataire": "Hôpital Principal",
+      "adresseLivraison": "Avenue Cheikh Anta Diop, Dakar",
+      "valeurDeclaree": 3000
+    }
+  ],
+  "coordonnees": [
+    {
+      "id": 1,
+      "ville": "Dakar",
+      "pays": "Sénégal",
+      "latitude": 14.6928,
+      "longitude": -17.4467
+    },
+    {
+      "id": 2,
+      "ville": "Abidjan",
+      "pays": "Côte d'Ivoire",
+      "latitude": 5.36,
+      "longitude": -4.0083
+    },
+    {
+      "id": 3,
+      "ville": "Casablanca",
+      "pays": "Maroc",
+      "latitude": 33.5731,
+      "longitude": -7.5898
+    },
+    {
+      "id": 4,
+      "ville": "Lagos",
+      "pays": "Nigeria",
+      "latitude": 6.5244,
+      "longitude": 3.3792
+    },
+    {
+      "id": 5,
+      "ville": "Accra",
+      "pays": "Ghana",
+      "latitude": 5.6037,
+      "longitude": -0.187
+    }
+  ]
 }
