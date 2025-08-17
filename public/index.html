@@ -1774,12 +1774,13 @@
                                     <h4 class="font-semibold text-gray-700 mb-3">Informations générales</h4>
                                     <div class="space-y-3">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                                            <select id="edit-cargaison-type" class="w-full border border-gray-300 rounded-md px-3 py-2">
-                                                <option value="maritime" ${cargaison.type === 'maritime' ? 'selected' : ''}>🚢 Maritime</option>
-                                                <option value="aerienne" ${cargaison.type === 'aerienne' ? 'selected' : ''}>✈️ Aérienne</option>
-                                                <option value="routiere" ${cargaison.type === 'routiere' ? 'selected' : ''}>🚛 Routière</option>
-                                            </select>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Type de transport</label>
+                                            <div class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-700">
+                                                ${cargaison.type === 'maritime' ? '🚢 Maritime' : 
+                                                  cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
+                                                  '🚛 Routière'} (Fixe)
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">Le type de transport ne peut pas être modifié après création</p>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">État</label>
@@ -2414,36 +2415,29 @@
                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Type de Produit</label>
-                                    <select id="typeProduit" required 
+                                    <select id="typeProduit" required onchange="updateCargaisonsList()"
                                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
                                         <option value="">Sélectionner un type</option>
-                                        <option value="alimentaire">Alimentaire</option>
-                                        <option value="materiel">Matériel</option>
-                                        <option value="chimique">Chimique</option>
+                                        <option value="alimentaire">🍎 Alimentaire</option>
+                                        <option value="materiel">📦 Matériel</option>
+                                        <option value="chimique">⚗️ Chimique</option>
+                                        <option value="fragile">💎 Fragile</option>
+                                        <option value="incassable">🔒 Incassable</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fragilité</label>
-                                    <select id="fragilite" required 
-                                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                        <option value="">Sélectionner</option>
-                                        <option value="fragile">Fragile</option>
-                                        <option value="incassable">Incassable</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Cargaison Associée</label>
                                     <select id="cargaisonId" required 
                                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                        <option value="">Sélectionner une cargaison</option>
-                                        <option value="CAR-2025-001">CAR-2025-001 (Maritime - Dakar → Paris)</option>
-                                        <option value="CAR-2025-002">CAR-2025-002 (Aérienne - Thiès → Lyon)</option>
+                                        <option value="">Sélectionner d'abord un type de produit</option>
                                     </select>
+                                    <div id="cargaisonInfo" class="mt-2 text-sm text-gray-600"></div>
                                 </div>
+                                
+                                <div></div> <!-- Espace vide pour maintenir la grille -->
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2544,7 +2538,6 @@
                 poids: parseFloat(document.getElementById('poids').value),
                 valeur: parseInt(document.getElementById('valeur').value),
                 typeProduit: document.getElementById('typeProduit').value,
-                fragilite: document.getElementById('fragilite').value,
                 cargaisonId: document.getElementById('cargaisonId').value,
                 client: {
                     nom: document.getElementById('nomClient').value,
@@ -2594,7 +2587,7 @@
         // Fonctions de sauvegarde et gestion des cargaisons
         async function saveCargaisonChanges(numero) {
             try {
-                const type = document.getElementById('edit-cargaison-type').value;
+                // Ne récupérer que les champs modifiables (PAS le type)
                 const etat = document.getElementById('edit-cargaison-etat').value;
                 const distance = parseFloat(document.getElementById('edit-cargaison-distance').value);
 
@@ -2603,11 +2596,12 @@
                     throw new Error('Cargaison non trouvée');
                 }
 
+                // Ne modifier que les champs autorisés (le type reste fixe)
                 const updatedCargaison = {
                     ...cargaison,
-                    type,
                     etat,
                     distance
+                    // type: cargaison.type reste inchangé
                 };
 
                 await window.detailsManager.updateCargaison(numero, updatedCargaison);
@@ -2716,38 +2710,88 @@
 
         async function showAddColisModal(cargaisonNumero) {
             try {
-                // Récupérer les colis disponibles (non assignés)
+                // Récupérer la cargaison pour connaître son type
+                const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
+                if (!cargaison) {
+                    throw new Error('Cargaison non trouvée');
+                }
+
+                // Récupérer tous les colis disponibles (non assignés)
                 const response = await fetch(`${API_BASE}/colis`);
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des colis');
                 }
                 
                 const allColis = await response.json();
-                const availableColis = allColis.filter(colis => !colis.cargaisonId || colis.cargaisonId === null);
+                const unassignedColis = allColis.filter(colis => !colis.cargaisonId || colis.cargaisonId === null);
 
-                if (availableColis.length === 0) {
-                    alert('Aucun colis disponible pour assignation');
+                // Filtrer les colis selon le type de transport de la cargaison
+                const compatibleColis = unassignedColis.filter(colis => {
+                    // Vérifier si le colis a un type de produit compatible avec le transport
+                    const transportType = cargaison.type;
+                    const productType = colis.produit?.type;
+
+                    // Règles de compatibilité transport/produit
+                    const compatibilityRules = {
+                        'maritime': ['alimentaire', 'chimique', 'incassable', 'materiel'], // Pas fragile pour maritime
+                        'aerienne': ['alimentaire', 'fragile', 'materiel'], // Pas chimique pour aérien
+                        'routiere': ['alimentaire', 'chimique', 'fragile', 'incassable', 'materiel'] // Tous types pour routier
+                    };
+
+                    // Si pas de type de produit défini, on accepte
+                    if (!productType) return true;
+                    
+                    // Vérifier la compatibilité
+                    const allowedTypes = compatibilityRules[transportType] || [];
+                    return allowedTypes.includes(productType);
+                });
+
+                if (compatibleColis.length === 0) {
+                    const transportLabel = cargaison.type === 'maritime' ? '🚢 Maritime' : 
+                                          cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
+                                          '🚛 Routière';
+                    alert(`Aucun colis compatible avec le transport ${transportLabel} disponible pour assignation`);
                     return;
                 }
+
+                const transportLabel = cargaison.type === 'maritime' ? '🚢 Maritime' : 
+                                      cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
+                                      '🚛 Routière';
 
                 const modalHtml = `
                     <div id="add-colis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
                             <div class="flex justify-between items-start mb-6">
-                                <h3 class="text-xl font-bold text-gray-900">Ajouter un colis à la cargaison</h3>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">Ajouter un colis à la cargaison</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Transport: ${transportLabel} - Colis compatibles uniquement</p>
+                                </div>
                                 <button onclick="this.closest('#add-colis-modal').remove()" 
                                         class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                             </div>
                             
+                            <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-blue-800">Règles de compatibilité:</span>
+                                </div>
+                                <div class="text-xs text-blue-700 mt-1 ml-4">
+                                    ${getCompatibilityInfo(cargaison.type)}
+                                </div>
+                            </div>
+
                             <div class="space-y-3 max-h-60 overflow-y-auto">
-                                ${availableColis.map(colis => `
+                                ${compatibleColis.map(colis => `
                                     <div class="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer" 
                                          onclick="assignColisToCargoaison('${cargaisonNumero}', '${colis.code}')">
                                         <div class="flex justify-between items-start">
                                             <div>
                                                 <div class="font-medium">${colis.code}</div>
                                                 <div class="text-sm text-gray-600">${colis.destinataire}</div>
-                                                <div class="text-xs text-gray-500">${colis.poids}kg - ${colis.valeurDeclaree}€</div>
+                                                <div class="text-xs text-gray-500">
+                                                    ${colis.poids}kg - ${colis.valeurDeclaree}€
+                                                    ${colis.produit?.type ? ` - ${getProductTypeIcon(colis.produit.type)}` : ''}
+                                                </div>
                                             </div>
                                             <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
                                                 Assigner
@@ -2757,7 +2801,10 @@
                                 `).join('')}
                             </div>
 
-                            <div class="flex justify-end mt-6 pt-6 border-t">
+                            <div class="flex justify-between items-center mt-6 pt-6 border-t">
+                                <div class="text-sm text-gray-500">
+                                    ${compatibleColis.length} colis compatible(s) disponible(s)
+                                </div>
                                 <button onclick="this.closest('#add-colis-modal').remove()" 
                                         class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
                                     Fermer
@@ -2820,6 +2867,139 @@
             } catch (error) {
                 console.error('Erreur lors de l\'assignation:', error);
                 alert('Erreur lors de l\'assignation: ' + error.message);
+            }
+        }
+
+        // Fonctions utilitaires pour la compatibilité transport/produit
+        function getCompatibilityInfo(transportType) {
+            const rules = {
+                'maritime': 'Autorisé: 🍎 Alimentaire, ⚗️ Chimique, 🔒 Incassable, ⚙️ Matériel (Interdit: Fragile)',
+                'aerienne': 'Autorisé: 🍎 Alimentaire, 💎 Fragile, ⚙️ Matériel (Interdit: Chimique)',
+                'routiere': 'Autorisé: Tous types de produits'
+            };
+            return rules[transportType] || 'Règles non définies';
+        }
+
+        function getProductTypeIcon(productType) {
+            const icons = {
+                'alimentaire': '🍎',
+                'chimique': '⚗️',
+                'fragile': '💎',
+                'incassable': '🔒',
+                'materiel': '⚙️'
+            };
+            return icons[productType] || '📦';
+        }
+
+        // Fonctions utilitaires pour la compatibilité transport/produit
+        function getCompatibilityInfo(transportType) {
+            const rules = {
+                'maritime': '• Accepte: Alimentaire, Chimique, Incassable, Matériel<br>• Refuse: Fragile (risque de casse en mer)',
+                'aerienne': '• Accepte: Alimentaire, Fragile, Matériel<br>• Refuse: Chimique (restrictions aériennes)',
+                'routiere': '• Accepte: Tous types de produits<br>• Transport le plus flexible'
+            };
+            return rules[transportType] || 'Aucune restriction spécifique';
+        }
+
+        function getProductTypeIcon(productType) {
+            const icons = {
+                'alimentaire': '🍎 Alimentaire',
+                'chimique': '⚗️ Chimique', 
+                'fragile': '💎 Fragile',
+                'incassable': '🔒 Incassable',
+                'materiel': '📦 Matériel'
+            };
+            return icons[productType] || productType;
+        }
+
+        // Fonction pour mettre à jour la liste des cargaisons selon le type de produit
+        async function updateCargaisonsList() {
+            const typeProduit = document.getElementById('typeProduit').value;
+            const cargaisonSelect = document.getElementById('cargaisonId');
+            const cargaisonInfo = document.getElementById('cargaisonInfo');
+
+            if (!typeProduit) {
+                cargaisonSelect.innerHTML = '<option value="">Sélectionner d\'abord un type de produit</option>';
+                cargaisonInfo.innerHTML = '';
+                return;
+            }
+
+            try {
+                // Récupérer toutes les cargaisons ouvertes
+                const response = await fetch(`${API_BASE}/cargaisons`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des cargaisons');
+                }
+
+                const allCargaisons = await response.json();
+                
+                // Filtrer les cargaisons ouvertes et compatibles avec le type de produit
+                const openCargaisons = allCargaisons.filter(cargaison => 
+                    cargaison.etat && (cargaison.etat === 'ouverte' || cargaison.etat === 'en_preparation')
+                );
+
+                // Règles de compatibilité inverse (produit vers transport)
+                const compatibilityRules = {
+                    'alimentaire': ['maritime', 'aerienne', 'routiere'], // Tous transports
+                    'chimique': ['maritime', 'routiere'], // Pas aérien
+                    'fragile': ['aerienne', 'routiere'], // Pas maritime
+                    'incassable': ['maritime', 'routiere'], // Pas aérien pour les gros objets
+                    'materiel': ['maritime', 'aerienne', 'routiere'] // Tous transports
+                };
+
+                const allowedTransports = compatibilityRules[typeProduit] || [];
+                const compatibleCargaisons = openCargaisons.filter(cargaison => 
+                    allowedTransports.includes(cargaison.type)
+                );
+
+                // Vérifier la capacité (max 10 colis par cargaison)
+                const availableCargaisons = compatibleCargaisons.filter(cargaison => {
+                    const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+                    return currentColis < 10;
+                });
+
+                // Mettre à jour le select
+                cargaisonSelect.innerHTML = '<option value="">Sélectionner une cargaison</option>';
+
+                if (availableCargaisons.length === 0) {
+                    cargaisonSelect.innerHTML = '<option value="">Aucune cargaison compatible disponible</option>';
+                    cargaisonInfo.innerHTML = `
+                        <div class="text-red-600">
+                            ⚠️ Aucune cargaison compatible avec le type "${getProductTypeIcon(typeProduit)}"<br>
+                            <span class="text-xs">Transports compatibles: ${allowedTransports.map(t => 
+                                t === 'maritime' ? '🚢 Maritime' : 
+                                t === 'aerienne' ? '✈️ Aérienne' : 
+                                '🚛 Routière'
+                            ).join(', ')}</span>
+                        </div>
+                    `;
+                } else {
+                    availableCargaisons.forEach(cargaison => {
+                        const currentColis = cargaison.colis ? cargaison.colis.length : 0;
+                        const transportIcon = cargaison.type === 'maritime' ? '🚢' : 
+                                             cargaison.type === 'aerienne' ? '✈️' : '🚛';
+                        const option = document.createElement('option');
+                        option.value = cargaison.numero;
+                        option.textContent = `${cargaison.numero} (${transportIcon} ${cargaison.type} - ${currentColis}/10 colis - ${cargaison.lieuDepart?.ville || 'Départ'} → ${cargaison.lieuArrivee?.ville || 'Arrivée'})`;
+                        cargaisonSelect.appendChild(option);
+                    });
+
+                    cargaisonInfo.innerHTML = `
+                        <div class="text-green-600">
+                            ✅ ${availableCargaisons.length} cargaison(s) compatible(s) trouvée(s)<br>
+                            <span class="text-xs">Produit "${getProductTypeIcon(typeProduit)}" accepté par: ${allowedTransports.map(t => 
+                                t === 'maritime' ? '🚢 Maritime' : 
+                                t === 'aerienne' ? '✈️ Aérienne' : 
+                                '🚛 Routière'
+                            ).join(', ')}</span>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des cargaisons:', error);
+                cargaisonSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                cargaisonInfo.innerHTML = '<div class="text-red-600">❌ Erreur lors du chargement des cargaisons</div>';
             }
         }
     </script>
