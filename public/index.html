@@ -500,7 +500,244 @@
         let authToken = localStorage.getItem('adminToken');
         let currentAdmin = null;
 
+        // Initialisation du DetailsManager simplifié
+        function initializeDetailsManager() {
+            window.detailsManager = {
+                apiUrl: API_BASE,
+                
+                async showCargaisonDetail(numero) {
+                    try {
+                        const response = await fetch(`${this.apiUrl}/cargaisons?numero=${numero}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        
+                        const cargaisons = await response.json();
+                        if (cargaisons.length === 0) {
+                            alert('Cargaison non trouvée');
+                            return;
+                        }
+
+                        const cargaison = cargaisons[0];
+                        this.displayCargaisonDetailModal(cargaison);
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la récupération des détails de la cargaison');
+                    }
+                },
+
+                async showColisDetail(code) {
+                    try {
+                        const response = await fetch(`${this.apiUrl}/colis?code=${code}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        
+                        const colisList = await response.json();
+                        if (colisList.length === 0) {
+                            alert('Colis non trouvé');
+                            return;
+                        }
+
+                        const colis = colisList[0];
+                        this.displayColisDetailModal(colis);
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la récupération des détails du colis');
+                    }
+                },
+
+                displayCargaisonDetailModal(cargaison) {
+                    const modalHtml = `
+                        <div id="cargaison-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                            <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+                                <div class="flex justify-between items-start mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900">Détails de la Cargaison ${cargaison.numero}</h3>
+                                    <button onclick="this.closest('#cargaison-detail-modal').remove()" 
+                                            class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">Informations générales</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Type:</span> ${this.getTypeLabel(cargaison.type)}</div>
+                                                <div><span class="font-medium">Numéro:</span> ${cargaison.numero}</div>
+                                                <div><span class="font-medium">État:</span> 
+                                                    <span class="inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(cargaison.etat)}">
+                                                        ${getEtatLabel(cargaison.etat)}
+                                                    </span>
+                                                </div>
+                                                <div><span class="font-medium">Distance:</span> ${cargaison.distance.toLocaleString('fr-FR')} km</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">Dates</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Création:</span> ${this.formatDate(cargaison.dateCreation)}</div>
+                                                ${cargaison.dateDepart ? `<div><span class="font-medium">Départ:</span> ${this.formatDate(cargaison.dateDepart)}</div>` : '<div class="text-gray-500 italic">Départ non programmé</div>'}
+                                                ${cargaison.dateArriveeEstimee ? `<div><span class="font-medium">Arrivée estimée:</span> ${this.formatDate(cargaison.dateArriveeEstimee)}</div>` : '<div class="text-gray-500 italic">Arrivée non estimée</div>'}
+                                                ${cargaison.dateArrivee ? `<div><span class="font-medium">Arrivée réelle:</span> ${this.formatDate(cargaison.dateArrivee)}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">🗺️ Itinéraire</h4>
+                                            <div class="space-y-3">
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                                                    <div>
+                                                        <span class="font-medium">Départ:</span> ${cargaison.lieuDepart.ville}
+                                                        <div class="text-xs text-gray-500">📍 ${cargaison.lieuDepart.latitude.toFixed(4)}, ${cargaison.lieuDepart.longitude.toFixed(4)}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                                    <div>
+                                                        <span class="font-medium">Arrivée:</span> ${cargaison.lieuArrivee.ville}
+                                                        <div class="text-xs text-gray-500">📍 ${cargaison.lieuArrivee.latitude.toFixed(4)}, ${cargaison.lieuArrivee.longitude.toFixed(4)}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">Colis (${cargaison.colis.length})</h4>
+                                            ${cargaison.colis.length > 0 ? 
+                                                `<div class="space-y-1 max-h-32 overflow-y-auto">
+                                                    ${cargaison.colis.map(code => `<div class="text-sm text-blue-600 cursor-pointer hover:underline" onclick="window.detailsManager.showColisDetail('${code}')">${code}</div>`).join('')}
+                                                </div>` : 
+                                                '<div class="text-gray-500 italic">Aucun colis</div>'
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 flex justify-end">
+                                    <button onclick="this.closest('#cargaison-detail-modal').remove()" 
+                                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                                        Fermer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                },
+
+                displayColisDetailModal(colis) {
+                    const modalHtml = `
+                        <div id="colis-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                            <div class="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto mx-4">
+                                <div class="flex justify-between items-start mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900">Détails du Colis ${colis.code}</h3>
+                                    <button onclick="this.closest('#colis-detail-modal').remove()" 
+                                            class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">📦 Informations du colis</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Code:</span> ${colis.code}</div>
+                                                <div><span class="font-medium">Libellé:</span> ${colis.libelle}</div>
+                                                <div><span class="font-medium">Poids:</span> ${colis.poids} kg</div>
+                                                <div><span class="font-medium">État:</span> 
+                                                    <span class="inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(colis.etat)}">
+                                                        ${getEtatLabel(colis.etat)}
+                                                    </span>
+                                                </div>
+                                                <div><span class="font-medium">Cargaison:</span> <span class="text-blue-600 cursor-pointer hover:underline" onclick="window.detailsManager.showCargaisonDetail('${colis.cargaisonId}')">${colis.cargaisonId}</span></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">📋 Produit</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Type:</span> ${this.getProductTypeLabel(colis.produit.type)}</div>
+                                                <div><span class="font-medium">Libellé:</span> ${colis.produit.libelle}</div>
+                                                <div><span class="font-medium">Poids:</span> ${colis.produit.poids} kg</div>
+                                                ${colis.produit.toxicite ? `<div><span class="font-medium">Toxicité:</span> <span class="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Niveau ${colis.produit.toxicite}</span></div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">👤 Client</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Nom complet:</span> ${colis.client.prenom} ${colis.client.nom}</div>
+                                                <div><span class="font-medium">Téléphone:</span> <a href="tel:${colis.client.telephone}" class="text-blue-600 hover:underline">${colis.client.telephone}</a></div>
+                                                <div><span class="font-medium">Adresse:</span> ${colis.client.adresse}</div>
+                                                ${colis.client.email ? `<div><span class="font-medium">Email:</span> <a href="mailto:${colis.client.email}" class="text-blue-600 hover:underline">${colis.client.email}</a></div>` : '<div class="text-gray-500 italic">Aucun email renseigné</div>'}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-700 mb-2">📅 Dates</h4>
+                                            <div class="space-y-2">
+                                                <div><span class="font-medium">Création:</span> ${this.formatDate(colis.dateCreation)}</div>
+                                                ${colis.dateExpedition ? `<div><span class="font-medium">Expédition:</span> ${this.formatDate(colis.dateExpedition)}</div>` : '<div class="text-gray-500 italic">Pas encore expédié</div>'}
+                                                ${colis.dateArrivee ? `<div><span class="font-medium">Arrivée:</span> ${this.formatDate(colis.dateArrivee)}</div>` : '<div class="text-gray-500 italic">Pas encore arrivé</div>'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 flex justify-end">
+                                    <button onclick="this.closest('#colis-detail-modal').remove()" 
+                                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                                        Fermer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                },
+
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                getTypeLabel(type) {
+                    switch(type) {
+                        case 'maritime': return '🚢 Maritime';
+                        case 'aerienne': return '✈️ Aérienne';
+                        case 'routiere': return '🚛 Routière';
+                        default: return type;
+                    }
+                },
+
+                getProductTypeLabel(type) {
+                    switch(type) {
+                        case 'alimentaire': return '🍎 Alimentaire';
+                        case 'chimique': return '⚗️ Chimique';
+                        case 'fragile': return '💎 Fragile';
+                        case 'incassable': return '🔒 Incassable';
+                        default: return type;
+                    }
+                }
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialiser le DetailsManager pour toute l'application
+            initializeDetailsManager();
+            
             if (authToken) {
                 const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
                 if (adminData.username) {
