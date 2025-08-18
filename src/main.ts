@@ -6,6 +6,9 @@ declare global {
     interface Window {
         appManager: AppManager;
         detailsManager: DetailsManager;
+        showColisDetail?: (code: string) => Promise<void>;
+        showAddCargaisonForm?: () => void;
+        showAddColisForm?: () => void;
     }
 }
 
