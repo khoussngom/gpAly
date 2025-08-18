@@ -59,9 +59,7 @@
       "dateArrivee": null,
       "dateArriveeEstimee": "2024-08-15T18:00:00.000Z",
       "etat": "en_transit",
-      "colis": [
-        "COL-1691234567890-5678"
-      ]
+      "colis": []
     },
     {
       "id": "CAR-1691234567890-2345",
@@ -83,9 +81,7 @@
       "dateArrivee": "2024-08-09T12:30:00.000Z",
       "dateArriveeEstimee": "2024-08-09T12:00:00.000Z",
       "etat": "arrivee",
-      "colis": [
-        "COL-1691234567890-9876"
-      ]
+      "colis": []
     },
     {
       "id": "CAR-1691234567890-3456",
@@ -129,9 +125,7 @@
       "dateArrivee": null,
       "dateArriveeEstimee": null,
       "etat": "ouverte",
-      "colis": [
-        "COL-1754697892136-3226"
-      ],
+      "colis": [],
       "specificData": {}
     },
     {
@@ -158,113 +152,9 @@
         "COL-1754858737075-5117"
       ],
       "specificData": {}
-    },
-    {
-      "numero": "12345",
-      "type": "aerienne",
-      "lieuDepart": "Ville inconnue, Pays inconnu",
-      "lieuArrivee": "Ville inconnue, Pays inconnu",
-      "dateDepart": "2025-08-17T19:35",
-      "dateArrivee": "2025-08-24T19:35",
-      "distance": 518,
-      "etat": "en_preparation",
-      "id": "4io-c0Q",
-      "colis": []
     }
   ],
   "colis": [
-    {
-      "id": "COL-1691234567890-5678",
-      "code": "COL-1691234567890-5678",
-      "libelle": "Riz basmati",
-      "poids": 25,
-      "produit": {
-        "type": "alimentaire",
-        "libelle": "Riz basmati",
-        "poids": 25
-      },
-      "client": {
-        "nom": "Dupont",
-        "prenom": "Jean",
-        "telephone": "+221 77 123 45 67",
-        "adresse": "123 Rue de la Paix, Dakar",
-        "email": "jean.dupont@email.com"
-      },
-      "etat": "en_transit",
-      "dateCreation": "2024-08-08T10:00:00.000Z",
-      "dateExpedition": "2024-08-10T08:00:00.000Z",
-      "dateArrivee": null,
-      "cargaisonId": "CAR-1691234567890-1234"
-    },
-    {
-      "id": "COL-1691234567890-9876",
-      "code": "COL-1691234567890-9876",
-      "libelle": "Ordinateur portable",
-      "poids": 2.5,
-      "produit": {
-        "type": "fragile",
-        "libelle": "Ordinateur portable",
-        "poids": 2.5
-      },
-      "client": {
-        "nom": "Diallo",
-        "prenom": "Aminata",
-        "telephone": "+212 66 987 65 43",
-        "adresse": "45 Avenue Hassan II, Casablanca",
-        "email": "aminata.diallo@email.ma"
-      },
-      "etat": "arrive",
-      "dateCreation": "2024-08-07T14:30:00.000Z",
-      "dateExpedition": "2024-08-09T06:00:00.000Z",
-      "dateArrivee": "2024-08-09T12:30:00.000Z",
-      "cargaisonId": "CAR-1691234567890-2345"
-    },
-    {
-      "id": "COL-1691234567890-1111",
-      "code": "COL-1691234567890-1111",
-      "libelle": "Médicaments",
-      "poids": 5,
-      "produit": {
-        "type": "chimique",
-        "libelle": "Médicaments",
-        "poids": 5,
-        "toxicite": 2
-      },
-      "client": {
-        "nom": "Kone",
-        "prenom": "Ibrahim",
-        "telephone": "+233 24 555 77 88",
-        "adresse": "12 Ring Road, Accra",
-        "email": "ibrahim.kone@email.gh"
-      },
-      "etat": "en_attente",
-      "dateCreation": "2024-08-08T16:00:00.000Z",
-      "dateExpedition": null,
-      "dateArrivee": null,
-      "cargaisonId": "CAR-1691234567890-3456"
-    },
-    {
-      "id": "COL-1754697892136-3226",
-      "code": "COL-1754697892136-3226",
-      "libelle": "sac",
-      "poids": 2,
-      "produit": {
-        "type": "incassable",
-        "libelle": "sac",
-        "poids": 2
-      },
-      "client": {
-        "nom": "ngom",
-        "prenom": "khouss",
-        "telephone": "774730039",
-        "adresse": "dakar"
-      },
-      "etat": "en_attente",
-      "dateCreation": "2025-08-09T00:05:40.785Z",
-      "dateExpedition": null,
-      "dateArrivee": null,
-      "cargaisonId": "CARG-1754697940784-261"
-    },
     {
       "id": "COL-1754858737075-5117",
       "code": "COL-1754858737075-5117",
@@ -286,61 +176,10 @@
       "dateCreation": "2025-08-10T20:46:33.867Z",
       "dateExpedition": null,
       "dateArrivee": null,
-      "cargaisonId": "CARG-1754858793866-772"
-    },
-    {
-      "id": "COL-TEST-001",
-      "code": "COL-TEST-001",
-      "libelle": "Smartphone Samsung",
-      "poids": 1.2,
-      "produit": {
-        "type": "fragile",
-        "libelle": "Smartphone Samsung",
-        "poids": 1.2
-      },
-      "client": {
-        "nom": "Martin",
-        "prenom": "Sophie",
-        "telephone": "+221 77 555 66 77",
-        "adresse": "15 Avenue Bourguiba, Dakar",
-        "email": "sophie.martin@email.com"
-      },
-      "etat": "en_attente",
-      "dateCreation": "2025-08-17T10:00:00.000Z",
-      "dateExpedition": null,
-      "dateArrivee": null,
-      "cargaisonId": null,
-      "destinataire": "Martin Sophie",
-      "adresseLivraison": "15 Avenue Bourguiba, Dakar",
-      "valeurDeclaree": 800,
-      "statut": "en_attente"
-    },
-    {
-      "id": "COL-TEST-002",
-      "code": "COL-TEST-002",
-      "libelle": "Produits chimiques",
-      "poids": 10.5,
-      "produit": {
-        "type": "chimique",
-        "libelle": "Produits chimiques",
-        "poids": 10.5,
-        "toxicite": 3
-      },
-      "client": {
-        "nom": "Laboratoire",
-        "prenom": "Alpha",
-        "telephone": "+221 33 888 99 00",
-        "adresse": "Zone industrielle, Dakar",
-        "email": "alpha.lab@email.com"
-      },
-      "etat": "en_attente",
-      "dateCreation": "2025-08-17T10:15:00.000Z",
-      "dateExpedition": null,
-      "dateArrivee": null,
-      "cargaisonId": null,
-      "destinataire": "Laboratoire Alpha",
-      "adresseLivraison": "Zone industrielle, Dakar",
-      "valeurDeclaree": 1500
+      "cargaisonId": "CARG-1754858793866-772",
+      "destinataire": "fallou",
+      "adresseLivraison": "fatick",
+      "valeurDeclaree": null
     },
     {
       "id": "COL-TEST-003",
@@ -393,32 +232,6 @@
       "destinataire": "Sow Mamadou",
       "adresseLivraison": "Quartier HLM, Dakar",
       "valeurDeclaree": 600
-    },
-    {
-      "id": "COL-TEST-005",
-      "code": "COL-TEST-005",
-      "libelle": "Équipement médical",
-      "poids": 12,
-      "produit": {
-        "type": "materiel",
-        "libelle": "Équipement médical",
-        "poids": 12
-      },
-      "client": {
-        "nom": "Hôpital",
-        "prenom": "Principal",
-        "telephone": "+221 33 111 22 33",
-        "adresse": "Avenue Cheikh Anta Diop, Dakar",
-        "email": "hopital.principal@email.com"
-      },
-      "etat": "en_attente",
-      "dateCreation": "2025-08-17T11:00:00.000Z",
-      "dateExpedition": null,
-      "dateArrivee": null,
-      "cargaisonId": null,
-      "destinataire": "Hôpital Principal",
-      "adresseLivraison": "Avenue Cheikh Anta Diop, Dakar",
-      "valeurDeclaree": 3000
     }
   ],
   "coordonnees": [

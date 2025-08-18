@@ -500,7 +500,6 @@
         let authToken = localStorage.getItem('adminToken');
         let currentAdmin = null;
 
-        // Initialisation du DetailsManager simplifié
         function initializeDetailsManager() {
             window.detailsManager = {
                 apiUrl: API_BASE,
@@ -643,7 +642,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-4">
                                         <div class="bg-gray-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-gray-700 mb-2">📦 Informations du colis</h4>
+                                            <h4 class="font-semibold text-gray-700 mb-2">Informations du colis</h4>
                                             <div class="space-y-2">
                                                 <div><span class="font-medium">Code:</span> ${colis.code}</div>
                                                 <div><span class="font-medium">Libellé:</span> ${colis.libelle}</div>
@@ -658,7 +657,7 @@
                                         </div>
                                         
                                         <div class="bg-gray-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-gray-700 mb-2">📋 Produit</h4>
+                                            <h4 class="font-semibold text-gray-700 mb-2">Produit</h4>
                                             <div class="space-y-2">
                                                 <div><span class="font-medium">Type:</span> ${this.getProductTypeLabel(colis.produit.type)}</div>
                                                 <div><span class="font-medium">Libellé:</span> ${colis.produit.libelle}</div>
@@ -670,7 +669,7 @@
                                     
                                     <div class="space-y-4">
                                         <div class="bg-gray-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-gray-700 mb-2">👤 Client</h4>
+                                            <h4 class="font-semibold text-gray-700 mb-2">Client</h4>
                                             <div class="space-y-2">
                                                 <div><span class="font-medium">Nom complet:</span> ${colis.client.prenom} ${colis.client.nom}</div>
                                                 <div><span class="font-medium">Téléphone:</span> <a href="tel:${colis.client.telephone}" class="text-blue-600 hover:underline">${colis.client.telephone}</a></div>
@@ -680,7 +679,7 @@
                                         </div>
                                         
                                         <div class="bg-gray-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-gray-700 mb-2">📅 Dates</h4>
+                                            <h4 class="font-semibold text-gray-700 mb-2">Dates</h4>
                                             <div class="space-y-2">
                                                 <div><span class="font-medium">Création:</span> ${this.formatDate(colis.dateCreation)}</div>
                                                 ${colis.dateExpedition ? `<div><span class="font-medium">Expédition:</span> ${this.formatDate(colis.dateExpedition)}</div>` : '<div class="text-gray-500 italic">Pas encore expédié</div>'}
@@ -715,19 +714,19 @@
 
                 getTypeLabel(type) {
                     switch(type) {
-                        case 'maritime': return '🚢 Maritime';
-                        case 'aerienne': return '✈️ Aérienne';
-                        case 'routiere': return '🚛 Routière';
+                        case 'maritime': return 'Maritime';
+                        case 'aerienne': return 'Aérienne';
+                        case 'routiere': return 'Routière';
                         default: return type;
                     }
                 },
 
                 getProductTypeLabel(type) {
                     switch(type) {
-                        case 'alimentaire': return '🍎 Alimentaire';
-                        case 'chimique': return '⚗️ Chimique';
-                        case 'fragile': return '💎 Fragile';
-                        case 'incassable': return '🔒 Incassable';
+                        case 'alimentaire': return 'Alimentaire';
+                        case 'chimique': return 'Chimique';
+                        case 'fragile': return 'Fragile';
+                        case 'incassable': return 'Incassable';
                         default: return type;
                     }
                 },
@@ -762,7 +761,7 @@
 
                 async updateCargaison(id, cargaisonData) {
                     try {
-                        // Trouver l'ID réel de la cargaison dans db.json
+
                         const response = await fetch(`${this.apiUrl}/cargaisons?numero=${id}`);
                         if (!response.ok) {
                             throw new Error('Erreur lors de la récupération de la cargaison');
@@ -794,7 +793,7 @@
 
                 async updateColis(id, colisData) {
                     try {
-                        // Trouver l'ID réel du colis dans db.json
+
                         const response = await fetch(`${this.apiUrl}/colis?code=${id}`);
                         if (!response.ok) {
                             throw new Error('Erreur lors de la récupération du colis');
@@ -887,12 +886,157 @@
                     if (percentage < 50) return 'bg-green-500';
                     if (percentage < 80) return 'bg-yellow-500';
                     return 'bg-red-500';
+                },
+
+                async deleteCargaison(numero) {
+                    if (!confirm(`Êtes-vous sûr de vouloir supprimer la cargaison ${numero} ?`)) {
+                        return;
+                    }
+
+                    try {
+
+                        const response = await fetch(`${this.apiUrl}/cargaisons?numero=${numero}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        
+                        const cargaisons = await response.json();
+                        if (cargaisons.length === 0) {
+                            alert('Cargaison non trouvée');
+                            return;
+                        }
+
+                        const cargaison = cargaisons[0];
+
+
+                        for (const colisCode of cargaison.colis) {
+                            const colisResponse = await fetch(`${this.apiUrl}/colis?code=${colisCode}`);
+                            if (colisResponse.ok) {
+                                const colisList = await colisResponse.json();
+                                if (colisList.length > 0) {
+                                    await fetch(`${this.apiUrl}/colis/${colisList[0].id}`, {
+                                        method: 'DELETE'
+                                    });
+                                }
+                            }
+                        }
+
+
+                        const deleteResponse = await fetch(`${this.apiUrl}/cargaisons/${cargaison.id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (deleteResponse.ok) {
+                            alert('Cargaison supprimée avec succès');
+
+                            if (typeof loadCargaisons === 'function') {
+                                loadCargaisons();
+                            }
+                        } else {
+                            throw new Error('Erreur lors de la suppression');
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la suppression de la cargaison');
+                    }
+                },
+
+                async deleteColis(code) {
+                    if (!confirm(`Êtes-vous sûr de vouloir supprimer le colis ${code} ?`)) {
+                        return;
+                    }
+
+                    try {
+
+                        const response = await fetch(`${this.apiUrl}/colis?code=${code}`);
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        
+                        const colisList = await response.json();
+                        if (colisList.length === 0) {
+                            alert('Colis non trouvé');
+                            return;
+                        }
+
+                        const colis = colisList[0];
+
+                        if (!colis.id) {
+                            throw new Error('Colis sans ID valide');
+                        }
+
+                        if (colis.cargaisonId && colis.cargaisonId !== null) {
+                            const cargaisonResponse = await fetch(`${this.apiUrl}/cargaisons/${colis.cargaisonId}`);
+                            if (cargaisonResponse.ok) {
+                                const cargaison = await cargaisonResponse.json();
+                                const updatedColis = cargaison.colis.filter(c => c !== code);
+                                
+                                await fetch(`${this.apiUrl}/cargaisons/${colis.cargaisonId}`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ colis: updatedColis }),
+                                });
+                            }
+                        }
+
+
+                        try {
+
+                            const deleteResponse = await fetch(`${this.apiUrl}/colis/${colis.id}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (deleteResponse.ok) {
+                                alert('Colis supprimé avec succès');
+
+                                if (typeof loadColis === 'function') {
+                                    loadColis();
+                                }
+                            } else if (deleteResponse.status === 500) {
+
+                                console.warn('Erreur 500 détectée, marquage comme supprimé...');
+                                
+                                const markAsDeletedResponse = await fetch(`${this.apiUrl}/colis/${colis.id}`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ 
+                                        etat: 'supprime',
+                                        dateSuppression: new Date().toISOString(),
+                                        supprime: true 
+                                    })
+                                });
+                                
+                                if (markAsDeletedResponse.ok) {
+                                    alert('Colis marqué comme supprimé (suppression physique impossible due à un problème serveur)');
+                                    
+                                    if (typeof loadColis === 'function') {
+                                        loadColis();
+                                    }
+                                } else {
+                                    throw new Error('Impossible de marquer le colis comme supprimé');
+                                }
+                            } else {
+                                const errorText = await deleteResponse.text();
+                                throw new Error(`Erreur lors de la suppression: ${deleteResponse.status} - ${errorText}`);
+                            }
+                        } catch (deleteError) {
+                            console.error('Erreur lors de la suppression:', deleteError);
+                            throw deleteError;
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        alert('Erreur lors de la suppression du colis');
+                    }
                 }
             };
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialiser le DetailsManager pour toute l'application
+
             initializeDetailsManager();
             
             if (authToken) {
@@ -1025,14 +1169,14 @@
                 let results = [];
                 
                 if (code) {
-                    // Recherche par code
+
                     response = await fetch(`${API_BASE}/colis?code=${encodeURIComponent(code)}`);
                     if (response.ok) {
                         const colis = await response.json();
                         results = colis;
                     }
                 } else if (nom && prenom) {
-                    // Recherche par nom et prénom
+
                     response = await fetch(`${API_BASE}/colis`);
                     if (response.ok) {
                         const allColis = await response.json();
@@ -1116,6 +1260,7 @@
                 case 'annule': case 'annulee': return 'bg-gray-100 text-gray-800';
                 case 'ouverte': return 'bg-green-100 text-green-800';
                 case 'fermee': return 'bg-blue-100 text-blue-800';
+                case 'supprime': return 'bg-red-100 text-red-800';
                 default: return 'bg-gray-100 text-gray-800';
             }
         }
@@ -1131,6 +1276,7 @@
                 case 'fermee': return 'Fermée';
                 case 'arrivee': return 'Arrivée';
                 case 'annulee': return 'Annulée';
+                case 'supprime': return 'Supprimé';
                 default: return etat;
             }
         }
@@ -1483,7 +1629,11 @@
                 }
                 
                 const colis = await response.json();
-                displayColisTable(colis);
+                
+
+                const colisActifs = colis.filter(col => !col.supprime && col.etat !== 'supprime');
+                
+                displayColisTable(colisActifs);
                 
             } catch (error) {
                 console.log('Erreur API, utilisation des données de démo:', error);
@@ -1734,7 +1884,6 @@
             }
         }
 
-        // Fonction pour afficher la modale d'édition de cargaison
         function showEditCargaisonModal(cargaison) {
             const progressPercentage = window.detailsManager.getProgressPercentage(cargaison);
             const progressColor = window.detailsManager.getProgressColor(progressPercentage);
@@ -1762,7 +1911,7 @@
                                      style="width: ${progressPercentage}%"></div>
                             </div>
                             <div class="text-xs text-gray-500 mt-1">
-                                ${isFullyLoaded ? '⚠️ Cargaison pleine - Aucun colis supplémentaire ne peut être ajouté' : 
+                                ${isFullyLoaded ? 'Cargaison pleine - Aucun colis supplémentaire ne peut être ajouté' : 
                                   `${10 - currentColis} colis peuvent encore être ajoutés`}
                             </div>
                         </div>
@@ -1776,9 +1925,9 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Type de transport</label>
                                             <div class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-700">
-                                                ${cargaison.type === 'maritime' ? '🚢 Maritime' : 
-                                                  cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
-                                                  '🚛 Routière'} (Fixe)
+                                                ${cargaison.type === 'maritime' ? 'Maritime' : 
+                                                  cargaison.type === 'aerienne' ? 'Aérienne' : 
+                                                  'Routière'} (Fixe)
                                             </div>
                                             <p class="text-xs text-gray-500 mt-1">Le type de transport ne peut pas être modifié après création</p>
                                         </div>
@@ -1859,7 +2008,6 @@
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        // Fonction pour afficher la modale d'édition de colis
         function showEditColisModal(colis) {
             const modalHtml = `
                 <div id="edit-colis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -1929,7 +2077,6 @@
             }
         }
 
-        // Fonctions de rafraîchissement des listes
         function refreshCargaisonsList() {
             showCargaisonsList();
         }
@@ -1938,7 +2085,6 @@
             showColisList();
         }
 
-        // Rendre les fonctions disponibles globalement
         window.refreshCargaisonsList = refreshCargaisonsList;
         window.refreshColisList = refreshColisList;
 
@@ -2362,7 +2508,7 @@
                     </button>
                     <div style="margin-top: 8px;">
                         <button id="clear-markers-btn" style="margin: 2px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background-color: #ff4444; color: white;">
-                            🗑️ Effacer
+                            Effacer
                         </button>
                     </div>
                 </div>
@@ -2418,11 +2564,11 @@
                                     <select id="typeProduit" required onchange="updateCargaisonsList()"
                                             class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
                                         <option value="">Sélectionner un type</option>
-                                        <option value="alimentaire">🍎 Alimentaire</option>
-                                        <option value="materiel">📦 Matériel</option>
-                                        <option value="chimique">⚗️ Chimique</option>
-                                        <option value="fragile">💎 Fragile</option>
-                                        <option value="incassable">🔒 Incassable</option>
+                                        <option value="alimentaire">Alimentaire</option>
+                                        <option value="materiel">Matériel</option>
+                                        <option value="chimique">Chimique</option>
+                                        <option value="fragile">Fragile</option>
+                                        <option value="incassable">Incassable</option>
                                     </select>
                                 </div>
                             </div>
@@ -2444,23 +2590,23 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Nom du Client</label>
                                     <input type="text" id="nomClient" required 
-                                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                           placeholder="Ex: Jean Dupont">
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Ex: Khouss NGOM">
                                 </div>
                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Contact du Client</label>
                                     <input type="tel" id="contactClient" required 
-                                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                           placeholder="Ex: +221 77 123 45 67">
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Ex: +221 77 123 45 67">
                                 </div>
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Description du Contenu</label>
                                 <textarea id="description" rows="3" required 
-                                          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                          placeholder="Décrivez le contenu du colis..."></textarea>
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="Décrivez le contenu du colis..."></textarea>
                             </div>
                             
                             <div class="flex justify-end space-x-4">
@@ -2478,7 +2624,6 @@
                 </div>
             `;
             
-            // Ajouter l'événement de soumission du formulaire
             document.getElementById('colisForm').addEventListener('submit', handleCreateColis);
         }
 
@@ -2488,8 +2633,7 @@
             }
         });
 
-        // Gestionnaire pour le bouton administration
-        // Fonction pour gérer la création d'une cargaison
+
         async function handleCreateCargaison(event) {
             event.preventDefault();
             
@@ -2505,7 +2649,6 @@
             };
             
             try {
-                // Tentative d'envoi à l'API
                 const response = await fetch(`${API_BASE}/cargaisons`, {
                     method: 'POST',
                     headers: {
@@ -2523,13 +2666,12 @@
                 }
             } catch (error) {
                 console.log('Erreur API, utilisation du mode démo:', error);
-                // Mode démo - simulation de succès
+
                 alert(`Cargaison créée avec succès ! (Mode démo)\\nNuméro: ${formData.numero}\\nType: ${formData.type}\\nDépart: ${formData.lieuDepart}\\nArrivée: ${formData.lieuArrivee}`);
                 showCargaisonsList();
             }
         }
         
-        // Fonction pour gérer la création d'un colis
         async function handleCreateColis(event) {
             event.preventDefault();
             
@@ -2548,7 +2690,7 @@
             };
             
             try {
-                // Tentative d'envoi à l'API
+
                 const response = await fetch(`${API_BASE}/colis`, {
                     method: 'POST',
                     headers: {
@@ -2566,7 +2708,7 @@
                 }
             } catch (error) {
                 console.log('Erreur API, utilisation du mode démo:', error);
-                // Mode démo - simulation de succès
+
                 alert(`Colis créé avec succès ! (Mode démo)\\nCode: ${formData.codeSuivi}\\nClient: ${formData.client.nom}\\nPoids: ${formData.poids} kg\\nValeur: ${formData.valeur} FCFA`);
                 showColisList();
             }
@@ -2584,10 +2726,8 @@
             }
         });
 
-        // Fonctions de sauvegarde et gestion des cargaisons
         async function saveCargaisonChanges(numero) {
             try {
-                // Ne récupérer que les champs modifiables (PAS le type)
                 const etat = document.getElementById('edit-cargaison-etat').value;
                 const distance = parseFloat(document.getElementById('edit-cargaison-distance').value);
 
@@ -2596,19 +2736,16 @@
                     throw new Error('Cargaison non trouvée');
                 }
 
-                // Ne modifier que les champs autorisés (le type reste fixe)
                 const updatedCargaison = {
                     ...cargaison,
                     etat,
                     distance
-                    // type: cargaison.type reste inchangé
                 };
 
                 await window.detailsManager.updateCargaison(numero, updatedCargaison);
                 
                 document.getElementById('edit-cargaison-modal').remove();
                 
-                // Rafraîchir l'affichage
                 if (typeof loadCargaisons === 'function') {
                     loadCargaisons();
                 }
@@ -2669,23 +2806,19 @@
             }
 
             try {
-                // Récupérer la cargaison
                 const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
                 if (!cargaison) {
                     throw new Error('Cargaison non trouvée');
                 }
 
-                // Retirer le colis de la liste
                 const updatedColis = cargaison.colis.filter(code => code !== colisCode);
                 const updatedCargaison = {
                     ...cargaison,
                     colis: updatedColis
                 };
 
-                // Mettre à jour la cargaison
                 await window.detailsManager.updateCargaison(cargaisonNumero, updatedCargaison);
 
-                // Mettre à jour le colis pour retirer l'assignation
                 const colis = await window.detailsManager.getColisById(colisCode);
                 if (colis) {
                     const updatedColisData = {
@@ -2696,7 +2829,6 @@
                     await window.detailsManager.updateColis(colisCode, updatedColisData);
                 }
 
-                // Fermer et réouvrir la modale pour actualiser
                 document.getElementById('edit-cargaison-modal').remove();
                 const refreshedCargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
                 showEditCargaisonModal(refreshedCargaison);
@@ -2710,13 +2842,12 @@
 
         async function showAddColisModal(cargaisonNumero) {
             try {
-                // Récupérer la cargaison pour connaître son type
+
                 const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
                 if (!cargaison) {
                     throw new Error('Cargaison non trouvée');
                 }
 
-                // Récupérer tous les colis disponibles (non assignés)
                 const response = await fetch(`${API_BASE}/colis`);
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des colis');
@@ -2725,38 +2856,36 @@
                 const allColis = await response.json();
                 const unassignedColis = allColis.filter(colis => !colis.cargaisonId || colis.cargaisonId === null);
 
-                // Filtrer les colis selon le type de transport de la cargaison
                 const compatibleColis = unassignedColis.filter(colis => {
-                    // Vérifier si le colis a un type de produit compatible avec le transport
+
                     const transportType = cargaison.type;
                     const productType = colis.produit?.type;
 
-                    // Règles de compatibilité transport/produit
+
                     const compatibilityRules = {
-                        'maritime': ['alimentaire', 'chimique', 'incassable', 'materiel'], // Pas fragile pour maritime
-                        'aerienne': ['alimentaire', 'fragile', 'materiel'], // Pas chimique pour aérien
-                        'routiere': ['alimentaire', 'chimique', 'fragile', 'incassable', 'materiel'] // Tous types pour routier
+                        'maritime': ['alimentaire', 'chimique', 'incassable', 'materiel'],
+                        'aerienne': ['alimentaire', 'fragile', 'materiel'],
+                        'routiere': ['alimentaire', 'chimique', 'fragile', 'incassable', 'materiel']
                     };
 
-                    // Si pas de type de produit défini, on accepte
+
                     if (!productType) return true;
                     
-                    // Vérifier la compatibilité
                     const allowedTypes = compatibilityRules[transportType] || [];
                     return allowedTypes.includes(productType);
                 });
 
                 if (compatibleColis.length === 0) {
-                    const transportLabel = cargaison.type === 'maritime' ? '🚢 Maritime' : 
-                                          cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
-                                          '🚛 Routière';
+                    const transportLabel = cargaison.type === 'maritime' ? 'Maritime' : 
+                                        cargaison.type === 'aerienne' ? 'Aérienne' : 
+                                        'Routière';
                     alert(`Aucun colis compatible avec le transport ${transportLabel} disponible pour assignation`);
                     return;
                 }
 
-                const transportLabel = cargaison.type === 'maritime' ? '🚢 Maritime' : 
-                                      cargaison.type === 'aerienne' ? '✈️ Aérienne' : 
-                                      '🚛 Routière';
+                const transportLabel = cargaison.type === 'maritime' ? 'Maritime' : 
+                                    cargaison.type === 'aerienne' ? 'Aérienne' : 
+                                    'Routière';
 
                 const modalHtml = `
                     <div id="add-colis-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -2783,7 +2912,7 @@
                             <div class="space-y-3 max-h-60 overflow-y-auto">
                                 ${compatibleColis.map(colis => `
                                     <div class="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer" 
-                                         onclick="assignColisToCargoaison('${cargaisonNumero}', '${colis.code}')">
+                                        onclick="assignColisToCargoaison('${cargaisonNumero}', '${colis.code}')">
                                         <div class="flex justify-between items-start">
                                             <div>
                                                 <div class="font-medium">${colis.code}</div>
@@ -2823,20 +2952,20 @@
 
         async function assignColisToCargoaison(cargaisonNumero, colisCode) {
             try {
-                // Récupérer la cargaison
+
                 const cargaison = await window.detailsManager.getCargaisonById(cargaisonNumero);
                 if (!cargaison) {
                     throw new Error('Cargaison non trouvée');
                 }
 
-                // Vérifier si la cargaison peut accepter plus de colis
+
                 const currentColis = cargaison.colis ? cargaison.colis.length : 0;
                 if (currentColis >= 10) {
                     alert('Cette cargaison est déjà pleine (10 colis maximum)');
                     return;
                 }
 
-                // Ajouter le colis à la cargaison
+
                 const updatedColisArray = [...(cargaison.colis || []), colisCode];
                 const updatedCargaison = {
                     ...cargaison,
@@ -2845,7 +2974,7 @@
 
                 await window.detailsManager.updateCargaison(cargaisonNumero, updatedCargaison);
 
-                // Mettre à jour le colis
+
                 const colis = await window.detailsManager.getColisById(colisCode);
                 if (colis) {
                     const updatedColisData = {
@@ -2856,7 +2985,6 @@
                     await window.detailsManager.updateColis(colisCode, updatedColisData);
                 }
 
-                // Fermer les modales et réouvrir la modale d'édition
                 document.getElementById('add-colis-modal').remove();
                 document.getElementById('edit-cargaison-modal').remove();
                 
@@ -2870,11 +2998,10 @@
             }
         }
 
-        // Fonctions utilitaires pour la compatibilité transport/produit
         function getCompatibilityInfo(transportType) {
             const rules = {
-                'maritime': 'Autorisé: 🍎 Alimentaire, ⚗️ Chimique, 🔒 Incassable, ⚙️ Matériel (Interdit: Fragile)',
-                'aerienne': 'Autorisé: 🍎 Alimentaire, 💎 Fragile, ⚙️ Matériel (Interdit: Chimique)',
+                'maritime': 'Autorisé:  Alimentaire,  Chimique,  Incassable,  Matériel (Interdit: Fragile)',
+                'aerienne': 'Autorisé:  Alimentaire,  Fragile,  Matériel (Interdit: Chimique)',
                 'routiere': 'Autorisé: Tous types de produits'
             };
             return rules[transportType] || 'Règles non définies';
@@ -2882,16 +3009,15 @@
 
         function getProductTypeIcon(productType) {
             const icons = {
-                'alimentaire': '🍎',
-                'chimique': '⚗️',
-                'fragile': '💎',
-                'incassable': '🔒',
-                'materiel': '⚙️'
+                'alimentaire': 'alimentaire',
+                'chimique': 'chimique',
+                'fragile': 'fragile',
+                'incassable': 'incassable',
+                'materiel': 'materiel'
             };
-            return icons[productType] || '📦';
+            return icons[productType] || 'colis';
         }
 
-        // Fonctions utilitaires pour la compatibilité transport/produit
         function getCompatibilityInfo(transportType) {
             const rules = {
                 'maritime': '• Accepte: Alimentaire, Chimique, Incassable, Matériel<br>• Refuse: Fragile (risque de casse en mer)',
@@ -2903,16 +3029,15 @@
 
         function getProductTypeIcon(productType) {
             const icons = {
-                'alimentaire': '🍎 Alimentaire',
-                'chimique': '⚗️ Chimique', 
-                'fragile': '💎 Fragile',
-                'incassable': '🔒 Incassable',
-                'materiel': '📦 Matériel'
+                'alimentaire': 'Alimentaire',
+                'chimique': 'Chimique', 
+                'fragile': 'Fragile',
+                'incassable': 'Incassable',
+                'materiel': 'Matériel'
             };
             return icons[productType] || productType;
         }
 
-        // Fonction pour mettre à jour la liste des cargaisons selon le type de produit
         async function updateCargaisonsList() {
             const typeProduit = document.getElementById('typeProduit').value;
             const cargaisonSelect = document.getElementById('cargaisonId');
@@ -2925,7 +3050,6 @@
             }
 
             try {
-                // Récupérer toutes les cargaisons ouvertes
                 const response = await fetch(`${API_BASE}/cargaisons`);
                 if (!response.ok) {
                     throw new Error('Erreur lors de la récupération des cargaisons');
@@ -2933,18 +3057,16 @@
 
                 const allCargaisons = await response.json();
                 
-                // Filtrer les cargaisons ouvertes et compatibles avec le type de produit
                 const openCargaisons = allCargaisons.filter(cargaison => 
                     cargaison.etat && (cargaison.etat === 'ouverte' || cargaison.etat === 'en_preparation')
                 );
 
-                // Règles de compatibilité inverse (produit vers transport)
                 const compatibilityRules = {
-                    'alimentaire': ['maritime', 'aerienne', 'routiere'], // Tous transports
-                    'chimique': ['maritime', 'routiere'], // Pas aérien
-                    'fragile': ['aerienne', 'routiere'], // Pas maritime
-                    'incassable': ['maritime', 'routiere'], // Pas aérien pour les gros objets
-                    'materiel': ['maritime', 'aerienne', 'routiere'] // Tous transports
+                    'alimentaire': ['maritime', 'aerienne', 'routiere'],
+                    'chimique': ['maritime', 'routiere'],
+                    'fragile': ['aerienne', 'routiere'],
+                    'incassable': ['maritime', 'routiere'],
+                    'materiel': ['maritime', 'aerienne', 'routiere']
                 };
 
                 const allowedTransports = compatibilityRules[typeProduit] || [];
@@ -2952,32 +3074,30 @@
                     allowedTransports.includes(cargaison.type)
                 );
 
-                // Vérifier la capacité (max 10 colis par cargaison)
                 const availableCargaisons = compatibleCargaisons.filter(cargaison => {
                     const currentColis = cargaison.colis ? cargaison.colis.length : 0;
                     return currentColis < 10;
                 });
 
-                // Mettre à jour le select
                 cargaisonSelect.innerHTML = '<option value="">Sélectionner une cargaison</option>';
 
                 if (availableCargaisons.length === 0) {
                     cargaisonSelect.innerHTML = '<option value="">Aucune cargaison compatible disponible</option>';
                     cargaisonInfo.innerHTML = `
                         <div class="text-red-600">
-                            ⚠️ Aucune cargaison compatible avec le type "${getProductTypeIcon(typeProduit)}"<br>
+                            Aucune cargaison compatible avec le type "${getProductTypeIcon(typeProduit)}"<br>
                             <span class="text-xs">Transports compatibles: ${allowedTransports.map(t => 
-                                t === 'maritime' ? '🚢 Maritime' : 
-                                t === 'aerienne' ? '✈️ Aérienne' : 
-                                '🚛 Routière'
+                                t === 'maritime' ? 'Maritime' : 
+                                t === 'aerienne' ? 'Aérienne' : 
+                                'Routière'
                             ).join(', ')}</span>
                         </div>
                     `;
                 } else {
                     availableCargaisons.forEach(cargaison => {
                         const currentColis = cargaison.colis ? cargaison.colis.length : 0;
-                        const transportIcon = cargaison.type === 'maritime' ? '🚢' : 
-                                             cargaison.type === 'aerienne' ? '✈️' : '🚛';
+                        const transportIcon = cargaison.type === 'maritime' ? 'maritime' : 
+                                            cargaison.type === 'aerienne' ? 'aerienne' : 'cargaison';
                         const option = document.createElement('option');
                         option.value = cargaison.numero;
                         option.textContent = `${cargaison.numero} (${transportIcon} ${cargaison.type} - ${currentColis}/10 colis - ${cargaison.lieuDepart?.ville || 'Départ'} → ${cargaison.lieuArrivee?.ville || 'Arrivée'})`;
@@ -2986,11 +3106,11 @@
 
                     cargaisonInfo.innerHTML = `
                         <div class="text-green-600">
-                            ✅ ${availableCargaisons.length} cargaison(s) compatible(s) trouvée(s)<br>
+                            ${availableCargaisons.length} cargaison(s) compatible(s) trouvée(s)<br>
                             <span class="text-xs">Produit "${getProductTypeIcon(typeProduit)}" accepté par: ${allowedTransports.map(t => 
-                                t === 'maritime' ? '🚢 Maritime' : 
-                                t === 'aerienne' ? '✈️ Aérienne' : 
-                                '🚛 Routière'
+                                t === 'maritime' ? ' Maritime' : 
+                                t === 'aerienne' ? ' Aérienne' : 
+                                'Routière'
                             ).join(', ')}</span>
                         </div>
                     `;
@@ -2999,7 +3119,7 @@
             } catch (error) {
                 console.error('Erreur lors du chargement des cargaisons:', error);
                 cargaisonSelect.innerHTML = '<option value="">Erreur de chargement</option>';
-                cargaisonInfo.innerHTML = '<div class="text-red-600">❌ Erreur lors du chargement des cargaisons</div>';
+                cargaisonInfo.innerHTML = '<div class="text-red-600"> Erreur lors du chargement des cargaisons</div>';
             }
         }
     </script>

@@ -1,12 +1,3 @@
-// TODO: Reconnecter ces imports une fois les modèles créés
-// import { Cargaison, EtatCargaison, Coordonnee } from './Cargaison';
-// import { Colis, EtatColis } from './Colis';
-// import { Maritime } from './Maritime';
-// import { Aerienne } from './Aerienne';
-// import { Routiere } from './Routiere';
-// import { Client } from './Client';
-
-// Types temporaires pour la compilation
 type Cargaison = any;
 type EtatCargaison = any;
 type Coordonnee = any;

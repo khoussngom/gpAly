@@ -1,10 +1,7 @@
-// Fonctions extraites du HTML pour l'interface utilisateur CargoTrack
-
 const API_BASE = 'http://localhost:3002';
 let authToken = localStorage.getItem('adminToken');
 let currentAdmin: any = null;
 
-// Types pour TypeScript
 interface CargaisonData {
     numero: string;
     type: string;
@@ -27,7 +24,6 @@ interface ColisData {
     produit?: any;
 }
 
-// === Fonctions utilitaires ===
 export function getStatusColor(status: string): string {
     switch (status) {
         case 'Assigné':
@@ -55,13 +51,11 @@ export function getEtatLabel(etat: string): string {
 }
 
 export function setActiveMenu(menuId: string): void {
-    // Supprimer la classe active de tous les menus
     document.querySelectorAll('.sidebar-menu li a').forEach(menu => {
         menu.classList.remove('bg-blue-600');
         menu.classList.add('hover:bg-gray-700');
     });
     
-    // Ajouter la classe active au menu sélectionné
     const activeMenu = document.querySelector(`[onclick*="${menuId}"]`);
     if (activeMenu) {
         activeMenu.classList.add('bg-blue-600');
@@ -69,7 +63,6 @@ export function setActiveMenu(menuId: string): void {
     }
 }
 
-// === Fonctions de navigation ===
 export function showPublicPage(): void {
     document.getElementById('public-page')!.classList.remove('hidden');
     document.getElementById('admin-panel')!.classList.add('hidden');
@@ -102,7 +95,6 @@ export function logout(): void {
     showPublicPage();
 }
 
-// === Fonctions de contenu admin ===
 export function showDashboard(): void {
     const contentDiv = document.getElementById('admin-content-area');
     if (!contentDiv) return;
@@ -116,7 +108,7 @@ export function showDashboard(): void {
                 <div class="bg-white p-6 rounded-lg shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="text-2xl">📦</div>
+                            <div class="text-2xl">colis</div>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Total Cargaisons</p>
@@ -128,7 +120,7 @@ export function showDashboard(): void {
                 <div class="bg-white p-6 rounded-lg shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="text-2xl">📫</div>
+                            <div class="text-2xl">livrer</div>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Total Colis</p>
@@ -140,7 +132,7 @@ export function showDashboard(): void {
                 <div class="bg-white p-6 rounded-lg shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="text-2xl">🚚</div>
+                            <div class="text-2xl">routiere</div>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">En cours</p>
@@ -152,7 +144,7 @@ export function showDashboard(): void {
                 <div class="bg-white p-6 rounded-lg shadow">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="text-2xl">✅</div>
+                            <div class="text-2xl">ok</div>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Livrés</p>
@@ -361,10 +353,10 @@ function displayColisTable(colis: ColisData[]): void {
 }
 
 export function showStats(): void {
-    showDashboard(); // Les stats sont intégrées dans le dashboard
+    showDashboard();
 }
 
-// === Fonctions de recherche ===
+
 export async function searchColis(): Promise<void> {
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
     if (!searchInput) return;
@@ -392,13 +384,12 @@ export async function searchColis(): Promise<void> {
 }
 
 export function showColisDetailFromSearch(code: string): void {
-    // Cette fonction sera liée au système de modales existant
+
     if (window.showColisDetail) {
         window.showColisDetail(code);
     }
 }
 
-// === Fonctions CRUD ===
 export function showCreateCargaison(): void {
     if (window.showAddCargaisonForm) {
         window.showAddCargaisonForm();
@@ -412,13 +403,12 @@ export function showCreateColis(): void {
 }
 
 export function editCargaison(numero: string): void {
-    // TODO: Implémenter l'édition de cargaison
+
     console.log('Edit cargaison:', numero);
     alert('Fonctionnalité en cours de développement');
 }
 
 export function editColis(code: string): void {
-    // TODO: Implémenter l'édition de colis
     console.log('Edit colis:', code);
     alert('Fonctionnalité en cours de développement');
 }
@@ -438,7 +428,7 @@ export async function deleteCargaison(numero: string): Promise<void> {
         
         if (response.ok) {
             alert('Cargaison supprimée avec succès');
-            loadCargaisons(); // Recharger la liste
+            loadCargaisons();
         } else {
             alert('Erreur lors de la suppression');
         }
@@ -463,7 +453,7 @@ export async function deleteColis(code: string): Promise<void> {
         
         if (response.ok) {
             alert('Colis supprimé avec succès');
-            loadColis(); // Recharger la liste
+            loadColis();
         } else {
             alert('Erreur lors de la suppression');
         }
@@ -473,7 +463,6 @@ export async function deleteColis(code: string): Promise<void> {
     }
 }
 
-// === Fonction d'authentification ===
 export async function doLogin(): Promise<void> {
     const usernameInput = document.getElementById('admin-username') as HTMLInputElement;
     const passwordInput = document.getElementById('admin-password') as HTMLInputElement;
@@ -514,7 +503,6 @@ export async function doLogin(): Promise<void> {
     }
 }
 
-// === Gestionnaire d'événements global ===
 export function initEventDelegation(): void {
     document.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
@@ -563,5 +551,5 @@ export function initEventDelegation(): void {
         }
     });
     
-    console.log('✅ Délégation d\'événements initialisée');
+    console.log(' Délégation d\'événements initialisée');
 }
